@@ -1,5 +1,5 @@
 //
-//  Constants.swift
+//  Configuration.swift
 //  
 //
 //  Created by Andrea Sacerdoti on 16.10.2019.
