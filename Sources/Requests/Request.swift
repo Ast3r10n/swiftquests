@@ -20,18 +20,21 @@ open class Request {
   public let parameters: [String: Any]?
   public let body: [String: Any]?
   private let credential: URLCredential?
+  private let configuration: RequestConfiguration
   public private(set) var urlRequest: URLRequest?
 
   public init(_ method: RequestMethod,
        _ resourcePath: String,
        parameters: [String: Any]? = nil,
        body: [String: Any]? = nil,
-       using credential: URLCredential? = nil) throws {
+       using credential: URLCredential? = nil,
+       configuration: RequestConfiguration = RequestConfiguration.main) throws {
     self.method = method
     self.resourcePath = resourcePath
     self.parameters = parameters
     self.body = body
     self.credential = credential
+    self.configuration = configuration
     self.urlRequest = try prepare()
   }
 
@@ -46,7 +49,7 @@ open class Request {
     }
 
     if let credential = credential {
-      URLCredentialStorage.shared.set(credential, for: defaultProtectionSpace, task: task)
+      URLCredentialStorage.shared.set(credential, for: configuration.defaultProtectionSpace, task: task)
     }
 
     task.resume()
@@ -60,7 +63,7 @@ open class Request {
 
     var urlRequest = URLRequest(url: url)
 
-    for header in defaultHeaders {
+    for header in RequestConfiguration.main.defaultHeaders {
       urlRequest.addValue(header.value, forHTTPHeaderField: header.key)
     }
 
@@ -73,8 +76,8 @@ open class Request {
 
   private func requestComponents() -> URLComponents {
     var requestURL = URLComponents()
-    requestURL.scheme = requestProtocol
-    requestURL.host = baseURL
+    requestURL.scheme = configuration.requestProtocol
+    requestURL.host = configuration.baseURL
     requestURL.path = "/\(resourcePath)"
 
     if let parameters = parameters {
