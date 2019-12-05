@@ -9,13 +9,9 @@ import XCTest
 @testable import Requests
 
 final class RequestTests: XCTestCase {
-  func testInit() {
+  func testInitMethod() {
     var request: Request?
-    do {
-      request = try Request(.post, "user", parameters: ["user": "12345"], body: ["testBody": "thisisatest"])
-    } catch {
-      XCTFail(error.localizedDescription)
-    }
+    request = try? Request(.post, "user", parameters: ["user": "12345"], body: ["testBody": "thisisatest"])
 
     XCTAssertEqual(request?.method, RequestMethod(rawValue: "POST"))
     XCTAssertEqual(request?.resourcePath, URLComponents(string: "user")?.url?.absoluteString)
