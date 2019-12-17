@@ -2,31 +2,44 @@
 //  ObjectRequest.swift
 //  
 //
-//  Created by Andrea Sacerdoti on 01/11/2019.
+//  Created by Andrea Sacerdoti on 17/12/2019.
 //
 
 import Foundation
 
-open class ObjectRequest<T: Decodable>: Request {
-  // MARK: - Properties
+class ObjectRequest<T: Codable>: Request {
+  // MARK: - Public Properties
   public let object: T.Type
 
   // MARK: - Public Methods
-  public func perform(_ completionHandler: @escaping ((T?, URLResponse?, Error?) throws -> Void)) throws {
-    try super.perform { data, response, error in
+  init(_ method: RequestMethod,
+                _ object: T.Type,
+                atPath resourcePath: String,
+                parameters: [String : String]? = nil,
+                body: Data? = nil,
+                headers: [String : String]? = nil,
+                using credential: URLCredential? = nil,
+                on session: URLSession? = nil) throws {
+    self.object = object
 
-      guard let data = data,
-        error == nil else {
-          try completionHandler(nil, response, error)
-          return
-      }
-      
-      try completionHandler(try JSONDecoder().decode(object, from: data), response, error)
-    }
+    try super.init(method,
+               atPath: resourcePath,
+               parameters: parameters,
+               body: body,
+               headers: headers,
+               using: credential,
+               on: session)
+
   }
 
-  // MARK: - Private Methods
-  override public init(_ method: RequestMethod, _ resourcePath: String, parameters: [String : Any]? = nil, body: Data? = nil, headers: [String : String]? = nil, using credential: URLCredential? = nil) throws {
-    <#code#>
+  func perform(_ completionHandler: @escaping ((T?, URLResponse?, Error?) throws -> Void)) throws {
+    try perform { data, response, error in
+      var object: T? = nil
+      if let data = data {
+        object = try JSONDecoder().decode(T.self, from: data)
+      }
+
+      try completionHandler(object, response, error)
+    }
   }
 }

@@ -10,13 +10,7 @@ import XCTest
 
 final class ObjectRequestTests: XCTestCase {
   func testInitObject() {
-    var request: ObjectRequest<User>?
+    let request = try? ObjectRequest(.get, User.self, atPath: "user")
     XCTAssertNotNil(request?.object)
-    request = try? ObjectRequest(.get, "user")
-
-    XCTAssertEqual(request?.method, RequestMethod(rawValue: "GET"))
-    XCTAssertEqual(request?.resourcePath, URLComponents(string: "user")?.url?.absoluteString)
-
-    XCTAssertEqual(request?.urlRequest?.allHTTPHeaderFields?["Content-Type"], "application/json")
   }
 }

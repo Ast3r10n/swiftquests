@@ -9,26 +9,46 @@ import XCTest
 @testable import Requests
 
 final class RequestTests: XCTestCase {
-  func testInitMethod() {
-    var request: Request?
-    request = try? Request(.post, "user", parameters: ["user": "12345"], body: ["testBody": "thisisatest"])
+  var request: Request? = nil
 
-    XCTAssertEqual(request?.method, RequestMethod(rawValue: "POST"))
+  override func setUp() {
+    super.setUp()
+    request = try? Request(.get,
+                           atPath: "user",
+                           parameters: ["user": "12345"],
+                           body: try? JSONSerialization.data(withJSONObject: ["testBody": "thisisatest"], options: .fragmentsAllowed),
+                           headers: ["Content-Type": "application/json"])
+  }
+
+  func testInitMethod() {
+    XCTAssertEqual(request?.method, RequestMethod(rawValue: "GET"))
+  }
+
+  func testInitResourcePath() {
     XCTAssertEqual(request?.resourcePath, URLComponents(string: "user")?.url?.absoluteString)
-    XCTAssertEqual(request?.parameters?["user"] as? String, "12345")
-    XCTAssertNotNil(request?.body)
-    XCTAssertEqual(request?.urlRequest?.allHTTPHeaderFields?["Content-Type"], "application/json")
+  }
+
+  func testInitParameters() {
+    XCTAssertEqual(request?.parameters?["user"], "12345")
+  }
+
+  func testInitBody() {
     XCTAssertEqual(request?.urlRequest?.httpBody, try! JSONSerialization.data(withJSONObject: ["testBody": "thisisatest"], options: .fragmentsAllowed))
+  }
+
+  func testInitHeaders() {
+     XCTAssertEqual(request?.urlRequest?.allHTTPHeaderFields?["Content-Type"], "application/json")
   }
 
   func testPerform() {
     let resultExpectation = expectation(description: "Request should perform correctly")
 
     do {
-      try Request(.get, "profile").perform { data, response, error in
-        if error == nil {
-          resultExpectation.fulfill()
+      try Request(.get, atPath: "profile").perform { data, response, error in
+        if let error = error {
+          XCTFail(error.localizedDescription)
         }
+        resultExpectation.fulfill()
       }
     } catch {
       XCTFail(error.localizedDescription)
@@ -38,7 +58,11 @@ final class RequestTests: XCTestCase {
   }
 
   static var allTests = [
-    ("testInit", testInit),
+    ("testInit", testInitMethod),
+    ("testInitResourcePath", testInitResourcePath),
+    ("testInitParameters", testInitParameters),
+    ("testInitHeaders", testInitHeaders),
+    ("testInitBody", testInitBody),
     ("testPerform", testPerform)
   ]
 }

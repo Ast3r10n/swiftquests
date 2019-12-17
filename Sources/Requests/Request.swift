@@ -17,11 +17,13 @@ public enum RequestMethod: String {
 open class Request {
   // MARK: - Properties
   public let method: RequestMethod
+  
   public let resourcePath: String
-  public let parameters: [String: Any]?
+  public let parameters: [String: String]?
   public let body: Data?
   public let headers: [String: String]?
   private let credential: URLCredential?
+  private var session = URLSession(configuration: .default)
   public private(set) var urlRequest: URLRequest?
 
   private var defaultHeaders: [String: String] {
@@ -54,17 +56,23 @@ open class Request {
 
   // MARK: - Public Methods
   public init(_ method: RequestMethod,
-              _ resourcePath: String,
-              parameters: [String: Any]? = nil,
+              atPath resourcePath: String,
+              parameters: [String: String]? = nil,
               body: Data? = nil,
               headers: [String: String]? = nil,
-              using credential: URLCredential? = nil) throws {
+              using credential: URLCredential? = nil,
+              on session: URLSession? = nil) throws {
     self.method = method
     self.resourcePath = resourcePath
     self.parameters = parameters
     self.body = body
     self.headers = headers
     self.credential = credential
+
+    if let session = session {
+      self.session = session
+    }
+
     self.urlRequest = try prepare()
   }
 
@@ -74,7 +82,7 @@ open class Request {
       return
     }
 
-    let task = URLSession.shared.dataTask(with: request) { data, response, error in
+    let task = session.dataTask(with: request) { data, response, error in
       try? completionHandler(data, response, error)
     }
 
@@ -124,13 +132,13 @@ open class Request {
     return components
   }
 
-  private func add(_ parameters: [String: Any], to urlComponents: inout URLComponents) {
+  private func add(_ parameters: [String: String], to urlComponents: inout URLComponents) {
     if urlComponents.queryItems == nil {
       urlComponents.queryItems = []
     }
 
     parameters.forEach { parameter in
-      urlComponents.queryItems?.append(URLQueryItem(name: parameter.key, value: parameter.value as? String))
+      urlComponents.queryItems?.append(URLQueryItem(name: parameter.key, value: parameter.value))
     }
   }
 }
