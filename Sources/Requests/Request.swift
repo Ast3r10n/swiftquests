@@ -15,37 +15,80 @@ public enum RequestMethod: String {
 }
 
 open class Request {
+  // MARK: - Properties
   public let method: RequestMethod
+  
   public let resourcePath: String
-  public let parameters: [String: Any]?
-  public let body: [String: Any]?
+  public let parameters: [String: String]?
+  public let body: Data?
+  public let headers: [String: String]?
   private let credential: URLCredential?
+<<<<<<< HEAD
   private let configuration: RequestConfiguration
+=======
+  private var session = URLSession(configuration: .default)
+>>>>>>> feature/codable
   public private(set) var urlRequest: URLRequest?
 
+  private var defaultHeaders: [String: String] {
+    [
+      "Accept": "application/json",
+      "Content-Type": "application/json",
+    ]
+  }
+
+  private var requestProtocol: String {
+    Bundle.main.infoDictionary?["RequestProtocol"] as? String ?? "https"
+  }
+
+  /// - Important: This must be set in the app's **Info.plist**.
+  private var baseURL: String {
+    Bundle.main.infoDictionary?["BaseURL"] as? String ?? "test.url.com"
+  }
+
+  private var authenticationRealm: String {
+    Bundle.main.infoDictionary?["AuthenticationRealm"] as? String ?? "Restricted"
+  }
+
+  private var defaultProtectionSpace: URLProtectionSpace {
+    URLProtectionSpace(host: baseURL,
+                       port: 443,
+                       protocol: requestProtocol,
+                       realm: authenticationRealm,
+                       authenticationMethod: NSURLAuthenticationMethodDefault)
+  }
+
+  // MARK: - Public Methods
   public init(_ method: RequestMethod,
-       _ resourcePath: String,
-       parameters: [String: Any]? = nil,
-       body: [String: Any]? = nil,
-       using credential: URLCredential? = nil,
-       configuration: RequestConfiguration = RequestConfiguration.main) throws {
+              atPath resourcePath: String,
+              parameters: [String: String]? = nil,
+              body: Data? = nil,
+              headers: [String: String]? = nil,
+              using credential: URLCredential? = nil,
+              on session: URLSession? = nil) throws {
+
     self.method = method
     self.resourcePath = resourcePath
     self.parameters = parameters
     self.body = body
+    self.headers = headers
     self.credential = credential
-    self.configuration = configuration
+
+    if let session = session {
+      self.session = session
+    }
+
     self.urlRequest = try prepare()
   }
 
-  // MARK: - Public Methods
-  public func perform(_ completionHandler: @escaping ((Data?, URLResponse?, Error?) -> Void)) throws {
+  public func perform(_ completionHandler: @escaping ((_ data: Data?, _ response: URLResponse?, _ error: Error?) throws -> Void)) throws {
     guard let request = urlRequest else {
-      throw NSError(domain: "Request", code: 0, userInfo: [NSLocalizedDescriptionKey: "Request not initialized."])
+      try completionHandler(nil, nil, NSError(domain: "Request", code: 0, userInfo: [NSLocalizedDescriptionKey: "Request not initialized."]))
+      return
     }
 
-    let task = URLSession.shared.dataTask(with: request) { data, response, error in
-      completionHandler(data, response, error)
+    let task = session.dataTask(with: request) { data, response, error in
+      try? completionHandler(data, response, error)
     }
 
     if let credential = credential {
@@ -62,38 +105,47 @@ open class Request {
     }
 
     var urlRequest = URLRequest(url: url)
+    urlRequest.httpMethod = method.rawValue
 
-    for header in RequestConfiguration.main.defaultHeaders {
+
+    defaultHeaders.forEach { header in
       urlRequest.addValue(header.value, forHTTPHeaderField: header.key)
     }
 
+    if let headers = headers {
+      headers.forEach { header in
+        urlRequest.addValue(header.key, forHTTPHeaderField: header.value)
+      }
+    }
+
     if let body = body {
-      urlRequest.httpBody = try JSONSerialization.data(withJSONObject: body, options: .fragmentsAllowed)
+      urlRequest.httpBody = body
     }
 
     return urlRequest
   }
 
   private func requestComponents() -> URLComponents {
-    var requestURL = URLComponents()
-    requestURL.scheme = configuration.requestProtocol
-    requestURL.host = configuration.baseURL
-    requestURL.path = "/\(resourcePath)"
+
+    var components = URLComponents()
+    components.scheme = requestProtocol
+    components.host = baseURL
+    components.path = "/\(resourcePath)"
 
     if let parameters = parameters {
-      add(parameters, to: &requestURL)
+      add(parameters, to: &components)
     }
 
-    return requestURL
+    return components
   }
 
-  private func add(_ parameters: [String: Any], to urlComponents: inout URLComponents) {
+  private func add(_ parameters: [String: String], to urlComponents: inout URLComponents) {
     if urlComponents.queryItems == nil {
       urlComponents.queryItems = []
     }
 
     parameters.forEach { parameter in
-      urlComponents.queryItems?.append(URLQueryItem(name: parameter.key, value: parameter.value as? String))
+      urlComponents.queryItems?.append(URLQueryItem(name: parameter.key, value: parameter.value))
     }
   }
 }
