@@ -12,6 +12,7 @@ public enum RequestMethod: String {
   case post = "POST"
   case put = "PUT"
   case delete = "DELETE"
+  case patch = "PATCH"
 }
 
 open class Request {
@@ -23,40 +24,10 @@ open class Request {
   public let body: Data?
   public let headers: [String: String]?
   private let credential: URLCredential?
-<<<<<<< HEAD
-  private let configuration: RequestConfiguration
-=======
+
   private var session = URLSession(configuration: .default)
->>>>>>> feature/codable
   public private(set) var urlRequest: URLRequest?
-
-  private var defaultHeaders: [String: String] {
-    [
-      "Accept": "application/json",
-      "Content-Type": "application/json",
-    ]
-  }
-
-  private var requestProtocol: String {
-    Bundle.main.infoDictionary?["RequestProtocol"] as? String ?? "https"
-  }
-
-  /// - Important: This must be set in the app's **Info.plist**.
-  private var baseURL: String {
-    Bundle.main.infoDictionary?["BaseURL"] as? String ?? "test.url.com"
-  }
-
-  private var authenticationRealm: String {
-    Bundle.main.infoDictionary?["AuthenticationRealm"] as? String ?? "Restricted"
-  }
-
-  private var defaultProtectionSpace: URLProtectionSpace {
-    URLProtectionSpace(host: baseURL,
-                       port: 443,
-                       protocol: requestProtocol,
-                       realm: authenticationRealm,
-                       authenticationMethod: NSURLAuthenticationMethodDefault)
-  }
+  open private(set) var configuration: RequestConfiguration
 
   // MARK: - Public Methods
   public init(_ method: RequestMethod,
@@ -65,7 +36,8 @@ open class Request {
               body: Data? = nil,
               headers: [String: String]? = nil,
               using credential: URLCredential? = nil,
-              on session: URLSession? = nil) throws {
+              on session: URLSession? = nil,
+              configuration: RequestConfiguration = RequestConfiguration.default) throws {
 
     self.method = method
     self.resourcePath = resourcePath
@@ -73,6 +45,7 @@ open class Request {
     self.body = body
     self.headers = headers
     self.credential = credential
+    self.configuration = configuration
 
     if let session = session {
       self.session = session
@@ -92,7 +65,9 @@ open class Request {
     }
 
     if let credential = credential {
-      URLCredentialStorage.shared.set(credential, for: configuration.defaultProtectionSpace, task: task)
+      URLCredentialStorage.shared.set(credential,
+                                      for: configuration.defaultProtectionSpace,
+                                      task: task)
     }
 
     task.resume()
@@ -101,14 +76,16 @@ open class Request {
   // MARK: - Private Methods
   private func prepare() throws -> URLRequest {
     guard let url = requestComponents().url else {
-      throw NSError(domain: "Request", code: 0, userInfo: [NSLocalizedDescriptionKey: "Invalid request URL."])
+      throw NSError(domain: "Request",
+                    code: 0,
+                    userInfo: [NSLocalizedDescriptionKey: "Invalid request URL."])
     }
 
     var urlRequest = URLRequest(url: url)
     urlRequest.httpMethod = method.rawValue
 
 
-    defaultHeaders.forEach { header in
+    configuration.defaultHeaders.forEach { header in
       urlRequest.addValue(header.value, forHTTPHeaderField: header.key)
     }
 
@@ -128,8 +105,8 @@ open class Request {
   private func requestComponents() -> URLComponents {
 
     var components = URLComponents()
-    components.scheme = requestProtocol
-    components.host = baseURL
+    components.scheme = configuration.requestProtocol
+    components.host = configuration.baseURL
     components.path = "/\(resourcePath)"
 
     if let parameters = parameters {
