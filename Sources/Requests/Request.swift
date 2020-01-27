@@ -27,7 +27,7 @@ open class Request {
 
   private var session = URLSession(configuration: .default)
   public private(set) var urlRequest: URLRequest?
-  open private(set) var configuration: RequestConfiguration
+  open private(set) var configuration: RequestConfiguration = RequestConfigurationHolder.shared.configuration
 
   // MARK: - Public Methods
   public init(_ method: RequestMethod,
@@ -37,7 +37,7 @@ open class Request {
               headers: [String: String]? = nil,
               using credential: URLCredential? = nil,
               on session: URLSession? = nil,
-              configuration: RequestConfiguration = .default) throws {
+              configuration: RequestConfiguration? = nil) throws {
 
     self.method = method
     self.resourcePath = resourcePath
@@ -45,7 +45,11 @@ open class Request {
     self.body = body
     self.headers = headers
     self.credential = credential
-    self.configuration = configuration
+
+    if let configuration = configuration {
+      self.configuration = configuration
+    }
+
 
     if let session = session {
       self.session = session
@@ -66,7 +70,7 @@ open class Request {
 
     if let credential = credential {
       URLCredentialStorage.shared.set(credential,
-                                      for: configuration.defaultProtectionSpace,
+                                      for: configuration.protectionSpace,
                                       task: task)
     }
 
