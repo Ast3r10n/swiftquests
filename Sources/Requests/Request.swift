@@ -37,7 +37,7 @@ open class Request {
               headers: [String: String]? = nil,
               using credential: URLCredential? = nil,
               on session: URLSession? = nil,
-              configuration: RequestConfiguration = RequestConfiguration.default) throws {
+              configuration: RequestConfiguration = .default) throws {
 
     self.method = method
     self.resourcePath = resourcePath

@@ -7,7 +7,7 @@
 
 import Foundation
 
-class ObjectRequest<T: Codable>: Request {
+open class ObjectRequest<T: Codable>: Request {
   // MARK: - Public Properties
   public let object: T.Type
 

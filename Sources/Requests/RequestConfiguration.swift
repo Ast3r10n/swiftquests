@@ -7,27 +7,27 @@
 
 import Foundation
 
-public class RequestConfiguration {
+open class RequestConfiguration {
   public static var `default` = RequestConfiguration()
 
-  var defaultHeaders: [String: String] =
+  open var defaultHeaders: [String: String] {
     [
       "Accept": "application/json",
       "Content-Type": "application/json",
     ]
-
-  var requestProtocol: String = Bundle.main.infoDictionary?["RequestProtocol"] as? String ?? "https"
-
+  }
+  
+  open var requestProtocol: String = Bundle.main.infoDictionary?["RequestProtocol"] as? String ?? "https"
 
   /// - Important: This must be set in the app's **Info.plist**.
-  var baseURL: String = Bundle.main.infoDictionary?["BaseURL"] as? String ?? "test.url.com"
+  open var baseURL: String = Bundle.main.infoDictionary?["BaseURL"] as? String ?? "test.url.com"
 
 
-  var authenticationRealm: String {
+  open var authenticationRealm: String {
     Bundle.main.infoDictionary?["AuthenticationRealm"] as? String ?? "Restricted"
   }
 
-  var defaultProtectionSpace: URLProtectionSpace {
+  open var defaultProtectionSpace: URLProtectionSpace {
     URLProtectionSpace(host: baseURL,
                        port: 443,
                        protocol: requestProtocol,
