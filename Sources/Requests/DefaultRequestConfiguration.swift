@@ -55,4 +55,7 @@ open class DefaultRequestConfiguration: RequestConfiguration {
                        realm: authenticationRealm,
                        authenticationMethod: authenticationMethod)
   }
+
+  public init() {
+  }
 }
