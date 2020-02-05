@@ -23,7 +23,7 @@ open class Request {
   public let parameters: [String: String]?
   public let body: Data?
   public let headers: [String: String]?
-  private let credential: URLCredential?
+  public let credential: URLCredential?
 
   private var session = URLSession(configuration: .default)
   public private(set) var urlRequest: URLRequest?
@@ -36,7 +36,7 @@ open class Request {
               body: Data? = nil,
               headers: [String: String]? = nil,
               using credential: URLCredential? = nil,
-              on session: URLSession? = nil,
+              onSession session: URLSession? = nil,
               configuration: RequestConfiguration? = nil) throws {
 
     self.method = method
@@ -50,7 +50,6 @@ open class Request {
       self.configuration = configuration
     }
 
-
     if let session = session {
       self.session = session
     }
@@ -59,6 +58,7 @@ open class Request {
   }
 
   public func perform(_ completionHandler: @escaping ((_ data: Data?, _ response: URLResponse?, _ error: Error?) throws -> Void)) throws {
+
     guard let request = urlRequest else {
       try completionHandler(nil, nil, NSError(domain: "Request", code: 0, userInfo: [NSLocalizedDescriptionKey: "Request not initialized."]))
       return
@@ -79,7 +79,7 @@ open class Request {
 
   // MARK: - Private Methods
   private func prepare() throws -> URLRequest {
-    guard let url = requestComponents().url else {
+    guard let url = requestComponents.url else {
       throw NSError(domain: "Request",
                     code: 0,
                     userInfo: [NSLocalizedDescriptionKey: "Invalid request URL."])
@@ -106,12 +106,12 @@ open class Request {
     return urlRequest
   }
 
-  private func requestComponents() -> URLComponents {
+  private var requestComponents: URLComponents {
 
     var components = URLComponents()
     components.scheme = configuration.requestProtocol
     components.host = configuration.baseURL
-    components.path = "/\(resourcePath)"
+    components.path = resourcePath
 
     if let parameters = parameters {
       add(parameters, to: &components)
