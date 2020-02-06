@@ -18,7 +18,7 @@ public enum RequestMethod: String {
 open class Request {
   // MARK: - Properties
   public let method: RequestMethod
-  
+
   public let resourcePath: String
   public let parameters: [String: String]?
   public let body: Data?
@@ -57,10 +57,15 @@ open class Request {
     self.urlRequest = try prepare()
   }
 
-  public func perform(_ completionHandler: @escaping ((_ data: Data?, _ response: URLResponse?, _ error: Error?) throws -> Void)) throws {
+  public func perform(_ completionHandler: @escaping (
+    _ data: Data?,
+    _ response: URLResponse?,
+    _ error: Error?) throws -> Void) throws {
 
     guard let request = urlRequest else {
-      try completionHandler(nil, nil, NSError(domain: "Request", code: 0, userInfo: [NSLocalizedDescriptionKey: "Request not initialized."]))
+      try completionHandler(nil, nil, NSError(domain: "Request",
+                                              code: 0,
+                                              userInfo: [NSLocalizedDescriptionKey: "Request not initialized."]))
       return
     }
 
@@ -75,6 +80,21 @@ open class Request {
     }
 
     task.resume()
+  }
+
+  public func perform<T: Codable>(decoding object: T.Type,
+                                  _ completionHandler: @escaping (
+    _ data: T?,
+    _ response: URLResponse?,
+    _ error: Error?) -> Void) throws {
+
+    try perform { data, response, error in
+      if error == nil,
+        let data = data {
+
+        completionHandler(try JSONDecoder().decode(T.self, from: data), response, error)
+      }
+    }
   }
 
   // MARK: - Private Methods
@@ -107,7 +127,6 @@ open class Request {
   }
 
   private var requestComponents: URLComponents {
-
     var components = URLComponents()
     components.scheme = configuration.requestProtocol
     components.host = configuration.baseURL

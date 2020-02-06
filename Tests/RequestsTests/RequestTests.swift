@@ -16,9 +16,12 @@ final class RequestTests: XCTestCase {
     request = try? Request(.get,
                            atPath: "/user",
                            parameters: ["user": "12345"],
-                           body: try? JSONSerialization.data(withJSONObject: ["testBody": "thisisatest"], options: .fragmentsAllowed),
+                           body: try? JSONSerialization.data(withJSONObject: ["testBody": "thisisatest"],
+                                                             options: .fragmentsAllowed),
                            headers: ["Content-Type": "application/json"],
-                           using: URLCredential(user: "test", password: "testPassword", persistence: .synchronizable),
+                           using: URLCredential(user: "test",
+                                                password: "testPassword",
+                                                persistence: .forSession),
                            onSession: URLSessionMock(),
                            configuration: DefaultRequestConfiguration())
   }
@@ -36,15 +39,19 @@ final class RequestTests: XCTestCase {
   }
 
   func testInitBody() {
-    XCTAssertEqual(request?.urlRequest?.httpBody, try? JSONSerialization.data(withJSONObject: ["testBody": "thisisatest"], options: .fragmentsAllowed))
+    XCTAssertEqual(request?.urlRequest?.httpBody,
+                   try? JSONSerialization.data(withJSONObject: ["testBody": "thisisatest"],
+                                               options: .fragmentsAllowed))
   }
 
   func testInitHeaders() {
-     XCTAssertEqual(request?.urlRequest?.allHTTPHeaderFields?["Content-Type"], "application/json")
+    XCTAssertEqual(request?.urlRequest?.allHTTPHeaderFields?["Content-Type"], "application/json")
   }
 
   func testInitCredential() {
-    XCTAssertEqual(request?.credential, URLCredential(user: "test", password: "testPassword", persistence: .synchronizable))
+    XCTAssertEqual(request?.credential, URLCredential(user: "test",
+                                                      password: "testPassword",
+                                                      persistence: .forSession))
   }
 
   func testInitThrow() {
@@ -58,9 +65,10 @@ final class RequestTests: XCTestCase {
   func testPerform() {
     let resultExpectation = expectation(description: "Request should perform correctly")
 
-    try? request?.perform { data, response, error in
-      XCTAssertNil(error)
-      resultExpectation.fulfill()
+    try? request?
+      .perform { data, response, error in
+        XCTAssertNil(error)
+        resultExpectation.fulfill()
     }
 
     wait(for: [resultExpectation], timeout: 5)
@@ -79,6 +87,21 @@ final class RequestTests: XCTestCase {
     }
 
     wait(for: [throwExpectation], timeout: 5)
+  }
+
+  func testPerformDecoding() {
+    let decodingExpectation = expectation(description: "Object should decode correctly")
+
+    try? Request(.get,
+                 atPath: "/user",
+                 onSession: URLSessionCodableMock())
+      .perform(decoding: User.self) { object, response, error in
+        if object?.username == "test" {
+          decodingExpectation.fulfill()
+        }
+    }
+
+    wait(for: [decodingExpectation], timeout: 5)
   }
 
   static var allTests = [
