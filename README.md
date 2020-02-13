@@ -1,3 +1,4 @@
 # Requests
 
-A URLSession-based 
+WIP
+An object oriented URLSession wrapper.
