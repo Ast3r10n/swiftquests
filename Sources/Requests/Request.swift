@@ -108,7 +108,6 @@ open class Request {
     var urlRequest = URLRequest(url: url)
     urlRequest.httpMethod = method.rawValue
 
-
     configuration.defaultHeaders.forEach { header in
       urlRequest.addValue(header.value, forHTTPHeaderField: header.key)
     }
