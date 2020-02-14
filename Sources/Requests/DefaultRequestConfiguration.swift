@@ -1,5 +1,5 @@
 //
-//  RequestConfiguration.swift
+//  DefaultRequestConfiguration.swift
 //  
 //
 //  Created by Andrea Sacerdoti on 22/01/2020.
