@@ -15,17 +15,27 @@ public enum RequestMethod: String {
   case patch = "PATCH"
 }
 
-open class Request {
+public protocol AbstractRequest {
+  func perform(_ completionHandler: @escaping (
+    _ data: Data?,
+    _ response: URLResponse?,
+    _ error: Error?) throws -> Void) throws
+}
+
+public protocol RequestDecorator: AbstractRequest {
+  var request: AbstractRequest { get set }
+}
+
+open class Request: AbstractRequest {
   // MARK: - Properties
   public let method: RequestMethod
-
   public let resourcePath: String
   public let parameters: [String: String]?
   public let body: Data?
   public let headers: [String: String]?
   public let credential: URLCredential?
 
-  private var session = URLSession(configuration: .default)
+  public var session = URLSession(configuration: .default)
   public private(set) var urlRequest: URLRequest?
   open private(set) var configuration: RequestConfiguration = RequestConfigurationHolder.shared.configuration
 
@@ -57,7 +67,7 @@ open class Request {
     self.urlRequest = try prepare()
   }
 
-  open func perform(_ completionHandler: @escaping (
+  public func perform(_ completionHandler: @escaping (
     _ data: Data?,
     _ response: URLResponse?,
     _ error: Error?) throws -> Void) throws {
@@ -82,7 +92,7 @@ open class Request {
     task.resume()
   }
 
-  open func perform<T: Codable>(decoding object: T.Type,
+  public func perform<T: Codable>(decoding object: T.Type,
                                   _ completionHandler: @escaping (
     _ data: T?,
     _ response: URLResponse?,
