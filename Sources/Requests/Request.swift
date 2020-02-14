@@ -57,7 +57,7 @@ open class Request {
     self.urlRequest = try prepare()
   }
 
-  public func perform(_ completionHandler: @escaping (
+  open func perform(_ completionHandler: @escaping (
     _ data: Data?,
     _ response: URLResponse?,
     _ error: Error?) throws -> Void) throws {
@@ -82,7 +82,7 @@ open class Request {
     task.resume()
   }
 
-  public func perform<T: Codable>(decoding object: T.Type,
+  open func perform<T: Codable>(decoding object: T.Type,
                                   _ completionHandler: @escaping (
     _ data: T?,
     _ response: URLResponse?,
