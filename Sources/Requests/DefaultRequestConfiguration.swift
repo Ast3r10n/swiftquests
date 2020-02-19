@@ -8,8 +8,13 @@
 import Foundation
 
 public protocol RequestConfiguration {
+  /// The default Request headers.
+  ///
+  /// Any headers passed to specific `Requests` would be appended to these.
   var defaultHeaders: [String: String] { get }
+  /// The Request protocol.
   var requestProtocol: String { get }
+  /// The default base URL (not including protocol).
   var baseURL: String { get }
   var authenticationRealm: String { get }
   var authenticationMethod: String { get }
@@ -22,6 +27,7 @@ public extension RequestConfiguration {
   }
 }
 
+/// The `RequestConfiguration` assigned to the `ReuqestConfigurationHolder` instance by default.
 open class DefaultRequestConfiguration: RequestConfiguration {
 
   open var defaultHeaders: [String: String] {
