@@ -7,7 +7,8 @@
 
 import Foundation
 
-public enum RequestMethod: String {
+/// An enum of REST method strings.
+public enum RESTMethod: String {
   case get = "GET"
   case post = "POST"
   case put = "PUT"
@@ -15,6 +16,7 @@ public enum RequestMethod: String {
   case patch = "PATCH"
 }
 
+/// A common interface for `Request`s and `RequestDecorator`s.
 public protocol AbstractRequest {
   func perform(_ completionHandler: @escaping (
     _ data: Data?,
@@ -22,25 +24,50 @@ public protocol AbstractRequest {
     _ error: Error?) throws -> Void) throws
 }
 
+/// Implemented by decorators to allow `request` overrides.
 public protocol RequestDecorator: AbstractRequest {
+  /// The `AbstractRequest` to decorate.
   var request: AbstractRequest { get set }
 }
 
+/// A base RESTful request object.
 open class Request: AbstractRequest {
   // MARK: - Properties
-  public let method: RequestMethod
+  public let method: RESTMethod
+  /// The resource path URL component.
+  ///
+  /// - Note: Must begin with a forward slash ("/"), otherwise the `Request` `init` will throw an error.
   public let resourcePath: String
+  /// The request parameters.
+  ///
+  /// - Note: Do not use this for the request body: use the `body` argument instead.
   public let parameters: [String: String]?
+  /// The encoded request body.
   public let body: Data?
+  /// The request headers.
+  ///
+  /// These headers will be appended to the specified `RequestConfiguration` `defaultHeaders`.
   public let headers: [String: String]?
+  /// The `URLCredential` to be used for the request.
+  ///
+  /// If not provided, the request will use the default credential
+  /// stored in the `URLCredentialStorage` `shared` instance.
   public let credential: URLCredential?
-
+  /// The request `URLSession`.
+  ///
+  /// Defaults to a session with a `default` `URLSessionConfiguration` unless otherwise specified.
   public var session = URLSession(configuration: .default)
+  /// The wrapped `URLRequest` object.
   public private(set) var urlRequest: URLRequest?
+  /// The request configuration.
+  ///
+  /// Defaults to the configuration stored in the `RequestConfigurationHolder` `shared` instance unless otherwise
+  /// specified.
   open private(set) var configuration: RequestConfiguration = RequestConfigurationHolder.shared.configuration
 
   // MARK: - Public Methods
-  public init(_ method: RequestMethod,
+  /// Creates a `Request` with the specified properties.
+  public init(_ method: RESTMethod,
               atPath resourcePath: String,
               parameters: [String: String]? = nil,
               body: Data? = nil,
