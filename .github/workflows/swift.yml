@@ -13,11 +13,6 @@ jobs:
       run: swift build -v
     - name: Run tests
       run: swift test -v
-    - name: Generate coverage report
-      run: |
-        pip install pytest
-        pip install pytest-cov
-        pytest --cov=./ --cov-report=xml
     - name: Codecov
       uses: codecov/codecov-action@v1.0.5
       with: 
