@@ -34,7 +34,7 @@ public protocol RequestDecorator: AbstractRequest {
 ///
 /// A `Request` object is a standalone task which should only exist within the scope of the request. Once initialised,
 /// use either the `perform(_:)` or `perform(decoding:_:)` methods to launch the request.
-/// `Request` properties are constant and only set within the initialiser.
+/// `Request` properties are constants and only set within the initialiser.
 open class Request: AbstractRequest {
   // MARK: - Properties
   /// The request REST method.
