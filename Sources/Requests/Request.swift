@@ -7,7 +7,7 @@
 
 import Foundation
 
-/// An enum of REST method strings.
+/// An enum of CRUD REST method strings.
 public enum RESTMethod: String {
   case get = "GET"
   case post = "POST"
