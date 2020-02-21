@@ -30,7 +30,7 @@ public protocol RequestDecorator: AbstractRequest {
   var request: AbstractRequest { get set }
 }
 
-/// A base RESTful request object.
+/// A basic RESTful request object.
 ///
 /// A `Request` object is a standalone task which should only exist within the scope of the request. Once initialised,
 /// use either the `perform(_:)` or `perform(decoding:_:)` methods to launch the request.
