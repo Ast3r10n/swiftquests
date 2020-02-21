@@ -2,7 +2,7 @@
 
 An object-oriented, URLSession-based network library.
 
-![Swift](https://github.com/Ast3r10n/requests/workflows/Swift/badge.svg)![GitHub tag (latest by date)](https://img.shields.io/github/v/tag/Ast3r10n/requests)
+![Swift](https://github.com/Ast3r10n/requests/workflows/Swift/badge.svg) ![GitHub tag (latest by date)](https://img.shields.io/github/v/tag/Ast3r10n/requests) ![Codecov](https://img.shields.io/codecov/c/gh/Ast3r10n/Requests?token=43bbf53852d24e549074f62b39f01e39)
 
 ## Installation
 
@@ -11,7 +11,23 @@ Add a Swift Package Dependency to your project with URL:
 https://github.com/Ast3r10n/requests
 ```
 
-### Usage
+## Usage
+
+### Basic Request
+
+To perform a basic `Request`, initialise one:
+
+```
+do {
+  let request = try Request(.get,
+                            atPath: "/user")
+} catch {
+  // Error handling
+}
+```
+### Decodable object Request
+
+Requests support automatic JSON decoding using `Decodable` objects 
 
 Here's an example `Request` to get a `Decodable` `User` object from the `/user` endpoint.
 
@@ -28,7 +44,9 @@ do {
 }
 ```
 
-# License
+
+
+## License
 
 Copyright 2020 Andrea Sacerdoti
 
