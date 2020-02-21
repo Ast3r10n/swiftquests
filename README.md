@@ -2,7 +2,7 @@
 
 An object-oriented, URLSession-based network library.
 
-![Swift](https://github.com/Ast3r10n/requests/workflows/Swift/badge.svg)![GitHub tag (latest by date)](https://img.shields.io/github/v/tag/Ast3r10n/requests)
+![Swift](https://github.com/Ast3r10n/requests/workflows/Swift/badge.svg) ![GitHub tag (latest by date)](https://img.shields.io/github/v/tag/Ast3r10n/requests) ![Codecov](https://img.shields.io/codecov/c/github/Ast3r10n/requests?token=44439f4d-d012-4000-a0c1-28647d07b545)
 
 ## Installation
 
