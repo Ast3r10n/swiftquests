@@ -9,12 +9,15 @@ import Foundation
 
 /// A holder for a `RequestConfiguration` object to be used by `Request`s by default.
 public class RequestConfigurationHolder {
+
   // MARK: - Public Properties
   /// The holder singleton instance.
   public static var shared = RequestConfigurationHolder()
+
   // MARK: - Internal Properties
   /// The configuration assigned to the holder.
   var configuration: RequestConfiguration
+
   // MARK: - Internal Methods
   /// Creates a holder object, assigning the specified configuration.
   ///
