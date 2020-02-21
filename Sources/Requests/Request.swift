@@ -67,7 +67,6 @@ open class Request: AbstractRequest {
 
   // MARK: - Public Methods
   /// Creates a `Request` with the specified properties.
-  ///
   /// - Parameters:
   ///   - method: A REST method.
   ///   - resourcePath: The resource path the request points to.
@@ -105,6 +104,14 @@ open class Request: AbstractRequest {
     self.urlRequest = try prepare()
   }
 
+  /// Performs the request, then executes the code block passed to the `completionHandler`.
+  /// - Parameters:
+  ///   - completionHandler: An handler called upon completion.
+  ///   - data: The response data.
+  ///   - response: The task response.
+  ///   - error: The task error.
+  /// - Throws: An error if either the `urlRequest` property was not properly initialised, or the `completionHandler`
+  ///   throws.
   public func perform(_ completionHandler: @escaping (
     _ data: Data?,
     _ response: URLResponse?,
@@ -130,6 +137,14 @@ open class Request: AbstractRequest {
     task.resume()
   }
 
+  /// Performs the request, trying to decode a specified `object` from the response,
+  /// and calls a handler upon completion.
+  /// - Parameters:
+  ///   - object: An object type to decode from the response data.
+  ///   - completionHandler: An handler called upon completion.
+  ///   - data: A decoded object.
+  ///   - response: The task response.
+  ///   - error: The task error.
   public func perform<T: Codable>(decoding object: T.Type,
                                   _ completionHandler: @escaping (
     _ data: T?,
