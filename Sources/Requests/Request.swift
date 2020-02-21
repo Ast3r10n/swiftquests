@@ -67,6 +67,17 @@ open class Request: AbstractRequest {
 
   // MARK: - Public Methods
   /// Creates a `Request` with the specified properties.
+  ///
+  /// - Parameters:
+  ///   - method: A REST method.
+  ///   - resourcePath: The resource path the request points to.
+  ///   - parameters: A dictionary of parameters. Defaults to nil.
+  ///   - body: An encoded body. Defaults to nil.
+  ///   - headers: A dictionary of headers to be appended to the configuration's `defaultHeaders`. Defaults to nil.
+  ///   - credential: A specific `URLCredential` to use with the request. Defaults to nil.
+  ///   - session: A specific `URLSession` to use with the request. Defaults to nil.
+  ///   - configuration: A specific `RequestConfiguration` to use with the request. Defaults to nil.
+  /// - Throws: An error if the `resourcePath` is malformed.
   public init(_ method: RESTMethod,
               atPath resourcePath: String,
               parameters: [String: String]? = nil,
