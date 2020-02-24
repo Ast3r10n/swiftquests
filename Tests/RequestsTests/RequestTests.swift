@@ -27,7 +27,7 @@ final class RequestTests: XCTestCase {
   }
 
   func testInitMethod() {
-    XCTAssertEqual(request?.method, RequestMethod(rawValue: "GET"))
+    XCTAssertEqual(request?.method, RESTMethod(rawValue: "GET"))
   }
 
   func testInitResourcePath() {

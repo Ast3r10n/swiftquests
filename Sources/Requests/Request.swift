@@ -7,7 +7,8 @@
 
 import Foundation
 
-public enum RequestMethod: String {
+/// An enum of CRUD REST method strings.
+public enum RESTMethod: String {
   case get = "GET"
   case post = "POST"
   case put = "PUT"
@@ -15,22 +16,83 @@ public enum RequestMethod: String {
   case patch = "PATCH"
 }
 
-open class Request {
-  // MARK: - Properties
-  public let method: RequestMethod
+/// A common interface for `Request`s and `RequestDecorator`s.
+public protocol AbstractRequest {
+  func perform(_ completionHandler: @escaping (
+    _ data: Data?,
+    _ response: URLResponse?,
+    _ error: Error?) throws -> Void) throws
+}
 
+/// Implemented by decorators to allow `request` overrides.
+public protocol RequestDecorator: AbstractRequest {
+
+  /// The `AbstractRequest` to decorate.
+  var request: AbstractRequest { get set }
+}
+
+/// A basic RESTful request object.
+///
+/// A `Request` object is a standalone task which should only exist within the scope of the request. Once initialised,
+/// use either the `perform(_:)` or `perform(decoding:_:)` methods to launch the request.
+/// `Request` properties are constants and only set within the initialiser.
+open class Request: AbstractRequest {
+  
+  // MARK: - Public Properties
+  /// The request REST method.
+  public let method: RESTMethod
+
+  /// The resource path URL component.
+  ///
+  /// - Note: Must begin with a forward slash ("/"), otherwise the `Request` `init` will throw an error.
   public let resourcePath: String
+
+  /// The request parameters.
+  ///
+  /// - Note: Do not use this for the request body: use the `body` argument instead.
   public let parameters: [String: String]?
+
+  /// The encoded request body.
   public let body: Data?
+
+  /// The request headers.
+  ///
+  /// These headers will be appended to the specified `RequestConfiguration` `defaultHeaders`.
   public let headers: [String: String]?
+
+  /// The `URLCredential` to be used for the request.
+  ///
+  /// If not provided, the request will use the default credential
+  /// stored in the `URLCredentialStorage` `shared` instance.
   public let credential: URLCredential?
 
-  private var session = URLSession(configuration: .default)
+  /// The request `URLSession`.
+  ///
+  /// Defaults to a session with a `default` `URLSessionConfiguration` unless otherwise specified.
+  public var session = URLSession(configuration: .default)
+
+  /// The wrapped `URLRequest` object.
   public private(set) var urlRequest: URLRequest?
+
+  /// The request configuration.
+  ///
+  /// Defaults to the configuration stored in the `RequestConfigurationHolder` `shared` instance unless otherwise
+  /// specified.
   open private(set) var configuration: RequestConfiguration = RequestConfigurationHolder.shared.configuration
 
   // MARK: - Public Methods
-  public init(_ method: RequestMethod,
+  /// Creates a `Request` with the specified properties.
+  /// - Parameters:
+  ///   - method: A REST method.
+  ///   - resourcePath: The resource path the request points to.
+  ///   - parameters: A dictionary of parameters. Defaults to nil.
+  ///   - body: An encoded body. Defaults to nil.
+  ///   - headers: A dictionary of headers to be appended to the configuration's `defaultHeaders`. Defaults to nil.
+  ///   - credential: A specific `URLCredential` to use with the request. Defaults to nil.
+  ///   - session: A specific `URLSession` to use with the request. Defaults to nil.
+  ///   - configuration: A specific `RequestConfiguration` to use with the request. Defaults to nil.
+  /// - Throws: An error if the `resourcePath` is malformed.
+  public init(_ method: RESTMethod,
               atPath resourcePath: String,
               parameters: [String: String]? = nil,
               body: Data? = nil,
@@ -57,6 +119,14 @@ open class Request {
     self.urlRequest = try prepare()
   }
 
+  /// Performs the request, then executes the code block passed to the `completionHandler`.
+  /// - Parameters:
+  ///   - completionHandler: An handler called upon completion.
+  ///   - data: The response data.
+  ///   - response: The task response.
+  ///   - error: The task error.
+  /// - Throws: An error if either the `urlRequest` property was not properly initialised, or the `completionHandler`
+  ///   throws.
   public func perform(_ completionHandler: @escaping (
     _ data: Data?,
     _ response: URLResponse?,
@@ -82,6 +152,14 @@ open class Request {
     task.resume()
   }
 
+  /// Performs the request, trying to decode a specified `object` from the response,
+  /// and calls a handler upon completion.
+  /// - Parameters:
+  ///   - object: An object type to decode from the response data.
+  ///   - completionHandler: An handler called upon completion.
+  ///   - data: A decoded object.
+  ///   - response: The task response.
+  ///   - error: The task error.
   public func perform<T: Codable>(decoding object: T.Type,
                                   _ completionHandler: @escaping (
     _ data: T?,
