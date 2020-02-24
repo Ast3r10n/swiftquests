@@ -13,6 +13,9 @@ https://github.com/Ast3r10n/requests
 
 ## Usage
 
+A `Request` is a basic, standalone object, with a single associated task, configured through its initialiser.
+Once initialised, a `Request` is (for the most part) immutable. Its task will only launch through the `perform` method call.
+
 ### Basic Request
 
 To perform a basic `Request`, initialise one:
@@ -25,9 +28,21 @@ do {
   // Error handling
 }
 ```
+You then call the `perform` method to launch its associated task.
+
+```
+do {
+  try request.perform { data, response, error in
+    // Response implementation
+  }
+} catch {
+  // Error handling
+}
+```
+
 ### Decodable object Request
 
-Requests support automatic JSON decoding using `Decodable` objects 
+`Request`s support automatic JSON decoding using `Decodable` objects 
 
 Here's an example `Request` to get a `Decodable` `User` object from the `/user` endpoint.
 
@@ -44,8 +59,6 @@ do {
 }
 ```
 
-
-
 ## License
 
 Copyright 2020 Andrea Sacerdoti
@@ -61,4 +74,3 @@ distributed under the License is distributed on an "AS IS" BASIS,
 WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
-
