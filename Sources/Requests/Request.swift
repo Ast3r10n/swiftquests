@@ -72,7 +72,7 @@ open class Request: AbstractRequest {
   public var session = URLSession(configuration: .default)
 
   /// The wrapped `URLRequest` object.
-  public private(set) var urlRequest: URLRequest?
+  public private(set) var urlRequest: URLRequest!
 
   /// The request configuration.
   ///
@@ -115,7 +115,7 @@ open class Request: AbstractRequest {
     if let session = session {
       self.session = session
     }
-
+    
     self.urlRequest = try prepare()
   }
 
@@ -132,14 +132,7 @@ open class Request: AbstractRequest {
     _ response: URLResponse?,
     _ error: Error?) throws -> Void) throws {
 
-    guard let request = urlRequest else {
-      try completionHandler(nil, nil, NSError(domain: "Request",
-                                              code: 0,
-                                              userInfo: [NSLocalizedDescriptionKey: "Request not initialized."]))
-      return
-    }
-
-    let task = session.dataTask(with: request) { data, response, error in
+    let task = session.dataTask(with: urlRequest) { data, response, error in
       try? completionHandler(data, response, error)
     }
 
@@ -183,24 +176,24 @@ open class Request: AbstractRequest {
                     userInfo: [NSLocalizedDescriptionKey: "Invalid request URL."])
     }
 
-    var urlRequest = URLRequest(url: url)
-    urlRequest.httpMethod = method.rawValue
+    var request = URLRequest(url: url)
+    request.httpMethod = method.rawValue
 
     configuration.defaultHeaders.forEach { header in
-      urlRequest.addValue(header.value, forHTTPHeaderField: header.key)
+      request.addValue(header.value, forHTTPHeaderField: header.key)
     }
 
     if let headers = headers {
       headers.forEach { header in
-        urlRequest.addValue(header.key, forHTTPHeaderField: header.value)
+        request.addValue(header.key, forHTTPHeaderField: header.value)
       }
     }
 
     if let body = body {
-      urlRequest.httpBody = body
+      request.httpBody = body
     }
 
-    return urlRequest
+    return request
   }
 
   private var requestComponents: URLComponents {
