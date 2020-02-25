@@ -115,7 +115,7 @@ open class Request: AbstractRequest {
     if let session = session {
       self.session = session
     }
-    
+
     self.urlRequest = try prepare()
   }
 
