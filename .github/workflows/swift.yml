@@ -4,14 +4,24 @@ on: [push]
 
 jobs:
   build:
-
     runs-on: macos-latest
 
     steps:
     - uses: actions/checkout@v2
     - name: Build
       run: swift build -v
+  test:
+    runs-on: macos-latest
+    steps:
+    - uses: actions/checkout@v2
     - name: Run tests
+      run: swift test -v --enable-code-coverage
+    
+  codecov:
+    runs-on: macos-latest
+    steps:
+    - uses: actions/checkout@v2
+    - name: Generate coverage report
       run: |
-        swift test -v --enable-code-coverage
+        xcodebuild -scheme Requests -sdk iphonesimulator -destination 'platform=iOS Simulator,name=iPhone 11 Pro,OS=13.3' -enableCodeCoverage YES build test
         bash <(curl -s https://codecov.io/bash) -t 44439f4d-d012-4000-a0c1-28647d07b545
