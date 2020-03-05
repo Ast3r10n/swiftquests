@@ -65,10 +65,10 @@ final class RequestTests: XCTestCase {
   func testPerform() {
     let resultExpectation = expectation(description: "Request should perform correctly")
 
-    try? request?
-      .perform { data, response, error in
-        XCTAssertNil(error)
-        resultExpectation.fulfill()
+    request?.perform { result in
+
+      XCTAssertNoThrow(try result.get())
+      resultExpectation.fulfill()
     }
 
     wait(for: [resultExpectation], timeout: 5)
@@ -81,8 +81,9 @@ final class RequestTests: XCTestCase {
 
     try? Request(.get,
                  atPath: "/test",
-                 onSession: session).perform { data, response, error in
-                  XCTAssertNotNil(error)
+                 onSession: session).perform { result in
+
+                  XCTAssertThrowsError(try result.get())
                   throwExpectation.fulfill()
     }
 
@@ -95,8 +96,11 @@ final class RequestTests: XCTestCase {
     try? Request(.get,
                  atPath: "/user",
                  onSession: URLSessionCodableMock())
-      .perform(decoding: User.self) { object, response, error in
-        if object?.username == "test" {
+      .perform(decoding: User.self) { result in
+
+        if let response = try? result.get(),
+          response.0?.username == "test" {
+
           decodingExpectation.fulfill()
         }
     }
