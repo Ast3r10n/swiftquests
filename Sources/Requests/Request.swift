@@ -16,6 +16,7 @@ public enum RESTMethod: String {
   case patch = "PATCH"
 }
 
+/// A typealias of a successful response
 public typealias Response = (data: Data?, urlResponse: URLResponse?)
 
 /// A common interface for `Request`s and `RequestDecorator`s.
@@ -121,8 +122,7 @@ open class Request: AbstractRequest {
   /// Performs the request, then executes the code block passed to the `completionHandler`.
   /// - Parameters:
   ///   - completionHandler: An handler called upon completion.
-  ///   - data: The response data.
-  ///   - response: The task response.
+  ///   - result: The response result.
   ///   - error: The task error.
   /// - Throws: An error if either the `urlRequest` property was not properly initialised, or the `completionHandler`
   ///   throws.
@@ -151,8 +151,7 @@ open class Request: AbstractRequest {
   /// - Parameters:
   ///   - object: An object type to decode from the response data.
   ///   - completionHandler: An handler called upon completion.
-  ///   - data: A decoded object.
-  ///   - response: The task response.
+  ///   - result: The response result.
   ///   - error: The task error.
   public func perform<T: Codable>(decoding object: T.Type,
                                   _ completionHandler: @escaping (
