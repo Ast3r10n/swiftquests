@@ -16,12 +16,12 @@ public enum RESTMethod: String {
   case patch = "PATCH"
 }
 
+/// A typealias of a successful response
+public typealias Response = (data: Data?, urlResponse: URLResponse?)
+
 /// A common interface for `Request`s and `RequestDecorator`s.
 public protocol AbstractRequest {
-  func perform(_ completionHandler: @escaping (
-    _ data: Data?,
-    _ response: URLResponse?,
-    _ error: Error?) throws -> Void) throws
+  func perform(_ completionHandler: @escaping (_ result: Result<Response, Error>) throws -> Void)
 }
 
 /// Implemented by decorators to allow `request` overrides.
@@ -122,18 +122,19 @@ open class Request: AbstractRequest {
   /// Performs the request, then executes the code block passed to the `completionHandler`.
   /// - Parameters:
   ///   - completionHandler: An handler called upon completion.
-  ///   - data: The response data.
-  ///   - response: The task response.
+  ///   - result: The response result.
   ///   - error: The task error.
   /// - Throws: An error if either the `urlRequest` property was not properly initialised, or the `completionHandler`
   ///   throws.
-  public func perform(_ completionHandler: @escaping (
-    _ data: Data?,
-    _ response: URLResponse?,
-    _ error: Error?) throws -> Void) throws {
+  public func perform(_ completionHandler: @escaping (_ result: Result<Response, Error>) throws -> Void) {
 
     let task = session.dataTask(with: urlRequest) { data, response, error in
-      try? completionHandler(data, response, error)
+      if let error = error {
+        try? completionHandler(.failure(error))
+        return
+      }
+
+      try? completionHandler(.success((data, response)))
     }
 
     if let credential = credential {
@@ -150,20 +151,26 @@ open class Request: AbstractRequest {
   /// - Parameters:
   ///   - object: An object type to decode from the response data.
   ///   - completionHandler: An handler called upon completion.
-  ///   - data: A decoded object.
-  ///   - response: The task response.
+  ///   - result: The response result.
   ///   - error: The task error.
   public func perform<T: Codable>(decoding object: T.Type,
                                   _ completionHandler: @escaping (
-    _ data: T?,
-    _ response: URLResponse?,
-    _ error: Error?) -> Void) throws {
+    _ result: Result<(T?, URLResponse?), Error>) throws -> Void) {
 
-    try perform { data, response, error in
-      if error == nil,
-        let data = data {
+    perform { result in
+      switch result {
+      case .success(let response):
+        guard let data = response.data else {
+          try completionHandler(.failure(NSError(domain: "",
+                                             code: 0,
+                                             userInfo: [NSLocalizedDescriptionKey: "Data returned nil."])))
+          return
+        }
 
-        completionHandler(try JSONDecoder().decode(T.self, from: data), response, error)
+        let object = try JSONDecoder().decode(T.self, from: data)
+        try completionHandler(.success((object, response.urlResponse)))
+      case .failure(let error):
+        try completionHandler(.failure(error))
       }
     }
   }
