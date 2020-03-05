@@ -65,25 +65,27 @@ final class RequestTests: XCTestCase {
   func testPerform() {
     let resultExpectation = expectation(description: "Request should perform correctly")
 
-    try? request?
-      .perform { data, response, error in
-        XCTAssertNil(error)
-        resultExpectation.fulfill()
+    request?.perform { result in
+
+      XCTAssertNoThrow(try result.get())
+      resultExpectation.fulfill()
     }
 
     wait(for: [resultExpectation], timeout: 5)
   }
 
   func testPerformErrorReturn() {
-    let throwExpectation = expectation(description: "Request should throw an error")
+    let throwExpectation = expectation(description: "Perform should throw an error")
     let session = URLSessionMock()
     session.error = NSError(domain: "test", code: 42, userInfo: [NSLocalizedDescriptionKey: "Test error"])
 
     try? Request(.get,
                  atPath: "/test",
-                 onSession: session).perform { data, response, error in
-                  XCTAssertNotNil(error)
-                  throwExpectation.fulfill()
+                 onSession: session)
+      .perform { result in
+
+        XCTAssertThrowsError(try result.get())
+        throwExpectation.fulfill()
     }
 
     wait(for: [throwExpectation], timeout: 5)
@@ -95,13 +97,50 @@ final class RequestTests: XCTestCase {
     try? Request(.get,
                  atPath: "/user",
                  onSession: URLSessionCodableMock())
-      .perform(decoding: User.self) { object, response, error in
-        if object?.username == "test" {
+      .perform(decoding: User.self) { result in
+
+        if let response = try? result.get(),
+          response.0?.username == "test" {
+
           decodingExpectation.fulfill()
         }
     }
 
     wait(for: [decodingExpectation], timeout: 5)
+  }
+
+  func testPerformDecodingError() {
+    let throwingExpectation = expectation(description: "Perform should throw an error")
+    let sessionMock = URLSessionCodableMock()
+    sessionMock.data = nil
+
+    try? Request(.get,
+                 atPath: "/user",
+                 onSession: sessionMock)
+      .perform(decoding: User.self) { result in
+
+        XCTAssertThrowsError(try result.get())
+        throwingExpectation.fulfill()
+    }
+
+    wait(for: [throwingExpectation], timeout: 5)
+  }
+
+  func testPerformDecodingPerformError() {
+    let throwingExpectation = expectation(description: "Perform should throw an error")
+    let sessionMock = URLSessionCodableMock()
+    sessionMock.error = NSError(domain: "test", code: 42, userInfo: [NSLocalizedDescriptionKey: "Test error"])
+
+    try? Request(.get,
+                 atPath: "/user",
+                 onSession: sessionMock)
+      .perform(decoding: User.self) { result in
+
+        XCTAssertThrowsError(try result.get())
+        throwingExpectation.fulfill()
+    }
+
+    wait(for: [throwingExpectation], timeout: 5)
   }
 
   static var allTests = [
