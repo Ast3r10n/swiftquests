@@ -16,7 +16,7 @@ public enum RESTMethod: String {
   case patch = "PATCH"
 }
 
-/// A typealias of a successful response
+/// A typealias of a successful response.
 public typealias Response = (data: Data?, urlResponse: URLResponse?)
 
 /// A common interface for `Request`s and `RequestDecorator`s.
