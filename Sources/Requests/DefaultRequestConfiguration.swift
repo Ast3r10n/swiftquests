@@ -13,19 +13,19 @@ public protocol RequestConfiguration {
   /// The default Request headers.
   ///
   /// Any headers passed to specific `Requests` would be appended to these.
-  var defaultHeaders: [String: String] { get }
+  var defaultHeaders: [String: String] { get set }
 
   /// The Request protocol.
-  var requestProtocol: String { get }
+  var requestProtocol: String { get set }
 
   /// The default base URL (not including protocol).
-  var baseURL: String { get }
+  var baseURL: String { get set }
 
   /// The server's authentication realm.
-  var authenticationRealm: String { get }
+  var authenticationRealm: String { get set }
 
   /// The default authentication method to use with Requests.
-  var authenticationMethod: String { get }
+  var authenticationMethod: String { get set }
 }
 
 public extension RequestConfiguration {
@@ -56,29 +56,18 @@ public extension RequestConfiguration {
 /// The `RequestConfiguration` assigned to the `RequestConfigurationHolder` instance by default.
 open class DefaultRequestConfiguration: RequestConfiguration {
 
-  open var defaultHeaders: [String: String] {
-    [
-      "Accept": "application/json",
-      "Content-Type": "application/json",
-    ]
-  }
+  open var defaultHeaders: [String: String] = [
+    "Accept": "application/json",
+    "Content-Type": "application/json",
+  ]
 
-  open var requestProtocol: String {
-    "https"
-  }
+  open var requestProtocol = "https"
 
+  open var baseURL = "test.url.com"
 
-  open var baseURL: String {
-    "test.url.com"
-  }
+  open var authenticationRealm = "Restricted"
 
-  open var authenticationRealm: String {
-    "Restricted"
-  }
-
-  open var authenticationMethod: String {
-    NSURLAuthenticationMethodDefault
-  }
+  open var authenticationMethod = NSURLAuthenticationMethodDefault
 
   public init() {
   }
