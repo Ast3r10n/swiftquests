@@ -7,7 +7,7 @@
 
 import Foundation
 
-/// Implemented by decorators to allow `request` overrides.
+/// Implemented by decorators to allow `Request` overrides.
 public protocol RequestDecorator: AbstractRequest {
 
   /// The `AbstractRequest` to decorate.
