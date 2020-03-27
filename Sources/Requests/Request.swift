@@ -16,7 +16,7 @@ public enum RESTMethod: String {
   case patch = "PATCH"
 }
 
-/// A typealias of a successful response
+/// A typealias of a successful response.
 public typealias Response = (data: Data?, urlResponse: URLResponse?)
 
 /// A common interface for `Request`s and `RequestDecorator`s.
@@ -153,7 +153,7 @@ open class Request: AbstractRequest {
   ///   - completionHandler: An handler called upon completion.
   ///   - result: The response result.
   ///   - error: The task error.
-  public func perform<T: Codable>(decoding object: T.Type,
+  public func perform<T: Decodable>(decoding object: T.Type,
                                   _ completionHandler: @escaping (
     _ result: Result<(T?, URLResponse?), Error>) throws -> Void) {
 
