@@ -24,13 +24,6 @@ public protocol AbstractRequest {
   func perform(_ completionHandler: @escaping (_ result: Result<Response, Error>) throws -> Void)
 }
 
-/// Implemented by decorators to allow `request` overrides.
-public protocol RequestDecorator: AbstractRequest {
-
-  /// The `AbstractRequest` to decorate.
-  var request: AbstractRequest { get set }
-}
-
 /// A basic RESTful request object.
 ///
 /// A `Request` object is a standalone task which should only exist within the scope of the request. Once initialised,
