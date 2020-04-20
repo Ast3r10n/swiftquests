@@ -126,7 +126,7 @@ open class Request: AbstractRequest {
   ///   - error: The task error.
   /// - Throws: An error if either the `urlRequest` property was not properly initialised, or the `completionHandler`
   ///   throws.
-  public func perform(_ completionHandler: @escaping (_ result: Result<Response, Error>) throws -> Void) {
+  open func perform(_ completionHandler: @escaping (_ result: Result<Response, Error>) throws -> Void) {
 
     let task = session.dataTask(with: urlRequest) { data, response, error in
       if let error = error {
@@ -153,7 +153,7 @@ open class Request: AbstractRequest {
   ///   - completionHandler: An handler called upon completion.
   ///   - result: The response result.
   ///   - error: The task error.
-  public func perform<T: Decodable>(decoding object: T.Type,
+  open func perform<T: Decodable>(decoding object: T.Type,
                                   _ completionHandler: @escaping (
     _ result: Result<(T?, URLResponse?), Error>) throws -> Void) {
 
