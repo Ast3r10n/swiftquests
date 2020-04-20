@@ -207,6 +207,7 @@ open class Request: AbstractRequest {
     var components = URLComponents()
     components.scheme = configuration.requestProtocol
     components.host = configuration.baseURL
+    components.port = configuration.port
     components.path = resourcePath
 
     if let parameters = parameters {
