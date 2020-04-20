@@ -72,7 +72,7 @@ open class Request: AbstractRequest {
   public var session = URLSession(configuration: .default)
 
   /// The wrapped `URLRequest` object.
-  public private(set) var urlRequest: URLRequest!
+  public var urlRequest: URLRequest!
 
   /// The request configuration.
   ///
