@@ -155,7 +155,7 @@ open class Request: AbstractRequest {
   ///   - error: The task error.
   open func perform<T: Decodable>(decoding object: T.Type,
                                   _ completionHandler: @escaping (
-    _ result: Result<(T?, URLResponse?), Error>) throws -> Void) {
+    _ result: Result<(T, URLResponse?), Error>) throws -> Void) {
 
     perform { result in
       switch result {
@@ -167,8 +167,7 @@ open class Request: AbstractRequest {
           return
         }
 
-        let object = try JSONDecoder().decode(T.self, from: data)
-        try completionHandler(.success((object, response.urlResponse)))
+        try completionHandler(.success((try JSONDecoder().decode(T.self, from: data), response.urlResponse)))
       case .failure(let error):
         try completionHandler(.failure(error))
       }

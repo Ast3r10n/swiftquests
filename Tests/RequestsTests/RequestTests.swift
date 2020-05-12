@@ -100,7 +100,7 @@ final class RequestTests: XCTestCase {
       .perform(decoding: User.self) { result in
 
         if let response = try? result.get(),
-          response.0?.username == "test" {
+          response.0.username == "test" {
 
           decodingExpectation.fulfill()
         }
