@@ -22,7 +22,7 @@ jobs:
     steps:
     - uses: actions/checkout@v2
     - name: Generate coverage report
-      run: xcodebuild -scheme Requests -sdk iphonesimulator -destination 'platform=iOS Simulator,name=iPhone 11 Pro,OS=13.3' -enableCodeCoverage YES build test
+      run: xcodebuild -scheme Requests -sdk iphonesimulator -destination 'platform=iOS Simulator,name=iPhone 11 Pro,OS=13.4.1' -enableCodeCoverage YES build test
     - name: Codecov
       uses: codecov/codecov-action@v1.0.5
       with:
