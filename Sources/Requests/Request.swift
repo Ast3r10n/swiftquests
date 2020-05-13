@@ -167,7 +167,13 @@ open class Request: AbstractRequest {
           return
         }
 
-        try completionHandler(.success((try JSONDecoder().decode(T.self, from: data), response.urlResponse)))
+        do {
+          let object = try JSONDecoder().decode(T.self, from: data)
+          try completionHandler(.success((object, response.urlResponse)))
+        } catch let error {
+          try completionHandler(.failure(error))
+        }
+
       case .failure(let error):
         try completionHandler(.failure(error))
       }
