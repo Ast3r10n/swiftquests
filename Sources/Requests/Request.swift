@@ -197,7 +197,7 @@ open class Request: AbstractRequest {
 
     if let headers = headers {
       headers.forEach { header in
-        request.addValue(header.key, forHTTPHeaderField: header.value)
+        request.addValue(header.value, forHTTPHeaderField: header.key)
       }
     }
 
