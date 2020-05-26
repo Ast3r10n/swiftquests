@@ -15,7 +15,7 @@ Pod::Spec.new do |spec|
   #  summary should be tweet-length, and the description more in depth.
   #
 
-  spec.name         = "Requests"
+  spec.name         = "AstRequests"
   spec.version      = "0.1.2"
   spec.summary      = "An object-oriented, URLSession-based network library."
 
@@ -25,7 +25,7 @@ Pod::Spec.new do |spec|
   #   * Write the description between the DESC delimiters below.
   #   * Finally, don't worry about the indent, CocoaPods strips it!
   spec.description  = <<-DESC
-  "An object-oriented, URLSession-based network library, made with simplicity in mind."
+  "An object-oriented, URLSession-based network library, made with simplicity in mind. It's a direct wrapper for URLSession, with no other dependencies."
                    DESC
 
   spec.homepage     = "https://github.com/Ast3r10n/requests"
