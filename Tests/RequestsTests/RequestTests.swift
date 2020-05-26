@@ -112,6 +112,23 @@ final class RequestTests: XCTestCase {
   func testPerformDecodingError() {
     let throwingExpectation = expectation(description: "Perform should throw an error")
     let sessionMock = URLSessionCodableMock()
+    sessionMock.data = Data(base64Encoded: "VEhJU0lTV1JPTkc=")
+
+    try? Request(.get,
+                 atPath: "/user",
+                 onSession: sessionMock)
+      .perform(decoding: User.self) { result in
+
+        XCTAssertThrowsError(try result.get())
+        throwingExpectation.fulfill()
+    }
+
+    wait(for: [throwingExpectation], timeout: 500)
+  }
+
+  func testPerformDecodingNoDataError() {
+    let throwingExpectation = expectation(description: "Perform should throw an error")
+    let sessionMock = URLSessionCodableMock()
     sessionMock.data = nil
 
     try? Request(.get,
