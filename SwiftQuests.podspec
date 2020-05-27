@@ -1,5 +1,5 @@
 #
-#  Be sure to run `pod spec lint requests.podspec' to ensure this is a
+#  Be sure to run `pod spec lint SwiftQuests.podspec' to ensure this is a
 #  valid spec and to remove all comments including this before submitting the spec.
 #
 #  To learn more about Podspec attributes see https://guides.cocoapods.org/syntax/podspec.html
@@ -15,7 +15,7 @@ Pod::Spec.new do |spec|
   #  summary should be tweet-length, and the description more in depth.
   #
 
-  spec.name         = "AstRequests"
+  spec.name         = "SwiftQuests"
   spec.version      = "0.1.2"
   spec.summary      = "An object-oriented, URLSession-based network library."
 
@@ -28,7 +28,7 @@ Pod::Spec.new do |spec|
   "An object-oriented, URLSession-based network library, made with simplicity in mind. It's a direct wrapper for URLSession, with no other dependencies."
                    DESC
 
-  spec.homepage     = "https://github.com/Ast3r10n/requests"
+  spec.homepage     = "https://github.com/Ast3r10n/swiftquests"
   # spec.screenshots  = "www.example.com/screenshots_1.gif", "www.example.com/screenshots_2.gif"
 
 
@@ -80,7 +80,7 @@ Pod::Spec.new do |spec|
   #  Supports git, hg, bzr, svn and HTTP.
   #
 
-  spec.source       = { :git => "https://github.com/Ast3r10n/requests.git", :tag => "#{spec.version}" }
+  spec.source       = { :git => "https://github.com/Ast3r10n/swiftquests.git", :tag => "#{spec.version}" }
 
 
   # ――― Source Code ―――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――― #

@@ -1,4 +1,4 @@
-# Requests
+# SwiftQuests
 
 An object-oriented, URLSession-based network library.
 
@@ -10,12 +10,14 @@ An object-oriented, URLSession-based network library.
 
 Add a Swift Package Dependency to your project with URL:
 ```
-https://github.com/Ast3r10n/requests
+https://github.com/Ast3r10n/swiftquests
 ```
 
 ### Cocoapods
 
-
+```
+pod 'SwiftQuests'
+```
 
 ## Usage
 

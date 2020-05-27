@@ -6,7 +6,7 @@
 //
 
 import XCTest
-@testable import Requests
+@testable import SwiftQuests
 
 final class RequestTests: XCTestCase {
   var request: Request?
