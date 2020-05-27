@@ -2,7 +2,7 @@
 
 An object-oriented, URLSession-based network library.
 
-![Swift](https://github.com/Ast3r10n/requests/workflows/Swift/badge.svg) ![GitHub tag (latest by date)](https://img.shields.io/github/v/tag/Ast3r10n/requests) ![Codecov](https://img.shields.io/codecov/c/gh/Ast3r10n/Requests?token=43bbf53852d24e549074f62b39f01e39)
+![Swift](https://github.com/Ast3r10n/requests/workflows/Swift/badge.svg) ![GitHub tag (latest by date)](https://img.shields.io/github/v/tag/Ast3r10n/requests) ![Codecov](https://img.shields.io/codecov/c/gh/Ast3r10n/swiftquests?token=43bbf53852d24e549074f62b39f01e39)
 
 ## Installation
 
@@ -15,6 +15,7 @@ https://github.com/Ast3r10n/swiftquests
 
 ### Cocoapods
 
+Add `SwiftQuests` to your Podfile:
 ```
 pod 'SwiftQuests'
 ```
@@ -40,7 +41,7 @@ You then call the `perform` method to launch its associated task.
 
 ```
 do {
-  try request.perform { data, response, error in
+  try request.perform { result in
     // Response implementation
   }
 } catch {
@@ -58,7 +59,7 @@ Here's an example `Request` to get a `Decodable` `User` object from the `/user` 
 do {
   try Request(.get,
               atPath: "/user")
-    .perform(decoding: User.self) { user, response, error in
+    .perform(decoding: User.self) { result in
     
     // Your completion handler here
   }
