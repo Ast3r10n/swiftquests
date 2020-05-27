@@ -41,7 +41,7 @@ You then call the `perform` method to launch its associated task.
 
 ```
 do {
-  try request.perform { data, response, error in
+  try request.perform { result in
     // Response implementation
   }
 } catch {
@@ -59,7 +59,7 @@ Here's an example `Request` to get a `Decodable` `User` object from the `/user` 
 do {
   try Request(.get,
               atPath: "/user")
-    .perform(decoding: User.self) { user, response, error in
+    .perform(decoding: User.self) { result in
     
     // Your completion handler here
   }
