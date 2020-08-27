@@ -14,9 +14,8 @@ public class RequestConfigurationHolder {
   /// The holder singleton instance.
   public static var shared = RequestConfigurationHolder()
 
-  // MARK: - Internal Properties
   /// The configuration assigned to the holder.
-  var configuration: RequestConfiguration
+  public var configuration: RequestConfiguration
 
   // MARK: - Internal Methods
   /// Creates a holder object, assigning the specified configuration.
