@@ -13,22 +13,22 @@ public protocol RequestConfiguration {
   /// The default Request headers.
   ///
   /// Any headers passed to specific `Requests` would be appended to these.
-  var defaultHeaders: [String: String] { get set }
+  var defaultHeaders: [String: String] { get }
 
   /// The Request protocol.
-  var requestProtocol: String { get set }
+  var requestProtocol: String { get }
 
   /// The default base URL (not including protocol).
-  var baseURL: String { get set }
+  var baseURL: String { get }
 
   /// The default port.
-  var port: Int { get set }
+  var port: Int { get }
 
   /// The server's authentication realm.
-  var authenticationRealm: String { get set }
+  var authenticationRealm: String { get }
 
   /// The default authentication method to use with Requests.
-  var authenticationMethod: String { get set }
+  var authenticationMethod: String { get }
 }
 
 public extension RequestConfiguration {
