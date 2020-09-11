@@ -16,7 +16,7 @@ https://github.com/Ast3r10n/swiftquests
 ### Cocoapods
 
 Add `SwiftQuests` to your Podfile:
-```
+```ruby
 pod 'SwiftQuests'
 ```
 
@@ -29,7 +29,7 @@ Once initialised, a `Request` is (for the most part) immutable. Its task will on
 
 To perform a basic `Request`, initialise one:
 
-```
+```swift
 do {
   let request = try Request(.get,
                             atPath: "/user")
@@ -39,7 +39,7 @@ do {
 ```
 You then call the `perform` method to launch its associated task.
 
-```
+```swift
 do {
   try request.perform { result in
     // Response implementation
@@ -55,7 +55,7 @@ do {
 
 Here's an example `Request` to get a `Decodable` `User` object from the `/user` endpoint.
 
-```
+```swift
 do {
   try Request(.get,
               atPath: "/user")
