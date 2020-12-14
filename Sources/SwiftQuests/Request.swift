@@ -69,7 +69,7 @@ open class Request: AbstractRequest {
   /// The request `URLSession`.
   ///
   /// Defaults to a session with a `default` `URLSessionConfiguration` unless otherwise specified.
-  public var session = URLSession(configuration: .default)
+  public var session = URLSession.shared
 
   /// The wrapped `URLRequest` object.
   public var urlRequest: URLRequest!

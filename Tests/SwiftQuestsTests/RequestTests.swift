@@ -11,8 +11,14 @@ import XCTest
 final class RequestTests: XCTestCase {
   var request: Request?
 
+  var session = URLSession(configuration: .ephemeral)
+
   override func setUp() {
     super.setUp()
+    URLProtocolMock.response = nil
+    let configuration = URLSessionConfiguration.ephemeral
+    configuration.protocolClasses = [URLProtocolMock.self]
+    session = URLSession(configuration: configuration)
     request = try? Request(.get,
                            atPath: "/user",
                            parameters: ["user": "12345"],
@@ -22,7 +28,7 @@ final class RequestTests: XCTestCase {
                            using: URLCredential(user: "test",
                                                 password: "testPassword",
                                                 persistence: .forSession),
-                           onSession: URLSessionMock(),
+                           onSession: session,
                            configuration: DefaultRequestConfiguration())
   }
 
@@ -76,8 +82,10 @@ final class RequestTests: XCTestCase {
 
   func testPerformErrorReturn() {
     let throwExpectation = expectation(description: "Perform should throw an error")
-    let session = URLSessionMock()
-    session.error = NSError(domain: "test", code: 42, userInfo: [NSLocalizedDescriptionKey: "Test error"])
+    URLProtocolMock.response = (nil, nil, NSError(domain: "test",
+                                                    code: 42,
+                                                    userInfo: [NSLocalizedDescriptionKey: "Test error"]))
+
 
     try? Request(.get,
                  atPath: "/test",
@@ -93,10 +101,13 @@ final class RequestTests: XCTestCase {
 
   func testPerformDecoding() {
     let decodingExpectation = expectation(description: "Object should decode correctly")
+    let user = User()
+    user.username = "test"
+    URLProtocolMock.response = (try? JSONEncoder().encode(user), nil, nil)
 
     try? Request(.get,
                  atPath: "/user",
-                 onSession: URLSessionCodableMock())
+                 onSession: session)
       .perform(decoding: User.self) { result in
 
         if let response = try? result.get(),
@@ -111,12 +122,11 @@ final class RequestTests: XCTestCase {
 
   func testPerformDecodingError() {
     let throwingExpectation = expectation(description: "Perform should throw an error")
-    let sessionMock = URLSessionCodableMock()
-    sessionMock.data = Data(base64Encoded: "VEhJU0lTV1JPTkc=")
+    URLProtocolMock.response = (Data(base64Encoded: "VEhJU0lTV1JPTkc="), nil, nil)
 
     try? Request(.get,
                  atPath: "/user",
-                 onSession: sessionMock)
+                 onSession: session)
       .perform(decoding: User.self) { result in
 
         XCTAssertThrowsError(try result.get())
@@ -128,12 +138,10 @@ final class RequestTests: XCTestCase {
 
   func testPerformDecodingNoDataError() {
     let throwingExpectation = expectation(description: "Perform should throw an error")
-    let sessionMock = URLSessionCodableMock()
-    sessionMock.data = nil
 
     try? Request(.get,
                  atPath: "/user",
-                 onSession: sessionMock)
+                 onSession: session)
       .perform(decoding: User.self) { result in
 
         XCTAssertThrowsError(try result.get())
@@ -145,12 +153,11 @@ final class RequestTests: XCTestCase {
 
   func testPerformDecodingPerformError() {
     let throwingExpectation = expectation(description: "Perform should throw an error")
-    let sessionMock = URLSessionCodableMock()
-    sessionMock.error = NSError(domain: "test", code: 42, userInfo: [NSLocalizedDescriptionKey: "Test error"])
+    URLProtocolMock.response = (nil, nil, NSError(domain: "test", code: 42, userInfo: [NSLocalizedDescriptionKey: "Test error"]))
 
     try? Request(.get,
                  atPath: "/user",
-                 onSession: sessionMock)
+                 onSession: session)
       .perform(decoding: User.self) { result in
 
         XCTAssertThrowsError(try result.get())
