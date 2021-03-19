@@ -123,7 +123,6 @@ open class Request: AbstractRequest {
   /// - Parameters:
   ///   - completionHandler: An handler called upon completion.
   ///   - result: The response result.
-  ///   - error: The task error.
   /// - Throws: An error if either the `urlRequest` property was not properly initialised, or the `completionHandler`
   ///   throws.
   open func perform(_ completionHandler: @escaping (_ result: Result<Response, Error>) throws -> Void) {
@@ -153,7 +152,6 @@ open class Request: AbstractRequest {
   ///   - object: An object type to decode from the response data.
   ///   - completionHandler: An handler called upon completion.
   ///   - result: The response result.
-  ///   - error: The task error.
   open func perform<T: Decodable>(decoding object: T.Type,
                                   _ completionHandler: @escaping (
     _ result: Result<(T, URLResponse?), Error>) throws -> Void) {
