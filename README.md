@@ -2,7 +2,7 @@
 
 An object-oriented, URLSession-based network library.
 
-![Swift](https://github.com/Ast3r10n/requests/workflows/Swift/badge.svg) ![GitHub tag (latest by date)](https://img.shields.io/github/v/tag/Ast3r10n/requests) ![Codecov](https://img.shields.io/codecov/c/gh/Ast3r10n/swiftquests?token=43bbf53852d24e549074f62b39f01e39) ![License](https://img.shields.io/github/license/Ast3r10n/swiftquests) ![Cocoapods](https://img.shields.io/cocoapods/p/SwiftQuests) ![LastCommit](https://img.shields.io/github/last-commit/Ast3r10n/swiftquests)
+![Swift](https://github.com/Ast3r10n/requests/workflows/Swift/badge.svg) ![GitHub tag (latest by date)](https://img.shields.io/github/v/tag/Ast3r10n/requests) ![Codecov](https://img.shields.io/codecov/c/gh/Ast3r10n/swiftquests?token=9980b291f6634fe6a969036234755d8c) ![License](https://img.shields.io/github/license/Ast3r10n/swiftquests) ![Cocoapods](https://img.shields.io/cocoapods/p/SwiftQuests) ![LastCommit](https://img.shields.io/github/last-commit/Ast3r10n/swiftquests)
 
 ## Installation
 
