@@ -6,7 +6,7 @@
 //
 
 import XCTest
-@testable import Requests
+@testable import SwiftQuests
 
 final class RequestTests: XCTestCase {
   var request: Request?
@@ -100,7 +100,7 @@ final class RequestTests: XCTestCase {
       .perform(decoding: User.self) { result in
 
         if let response = try? result.get(),
-          response.0?.username == "test" {
+          response.0.username == "test" {
 
           decodingExpectation.fulfill()
         }
@@ -110,6 +110,23 @@ final class RequestTests: XCTestCase {
   }
 
   func testPerformDecodingError() {
+    let throwingExpectation = expectation(description: "Perform should throw an error")
+    let sessionMock = URLSessionCodableMock()
+    sessionMock.data = Data(base64Encoded: "VEhJU0lTV1JPTkc=")
+
+    try? Request(.get,
+                 atPath: "/user",
+                 onSession: sessionMock)
+      .perform(decoding: User.self) { result in
+
+        XCTAssertThrowsError(try result.get())
+        throwingExpectation.fulfill()
+    }
+
+    wait(for: [throwingExpectation], timeout: 500)
+  }
+
+  func testPerformDecodingNoDataError() {
     let throwingExpectation = expectation(description: "Perform should throw an error")
     let sessionMock = URLSessionCodableMock()
     sessionMock.data = nil

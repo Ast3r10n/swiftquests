@@ -69,7 +69,7 @@ open class Request: AbstractRequest {
   /// The request `URLSession`.
   ///
   /// Defaults to a session with a `default` `URLSessionConfiguration` unless otherwise specified.
-  public var session = URLSession(configuration: .default)
+  public var session = URLSession(configuration: .ephemeral)
 
   /// The wrapped `URLRequest` object.
   public var urlRequest: URLRequest!
@@ -138,9 +138,10 @@ open class Request: AbstractRequest {
     }
 
     if let credential = credential {
-      URLCredentialStorage.shared.set(credential,
-                                      for: configuration.protectionSpace,
-                                      task: task)
+      URLCredentialStorage.shared.set(
+        credential,
+        for: configuration.protectionSpace,
+        task: task)
     }
 
     task.resume()
@@ -155,7 +156,7 @@ open class Request: AbstractRequest {
   ///   - error: The task error.
   open func perform<T: Decodable>(decoding object: T.Type,
                                   _ completionHandler: @escaping (
-    _ result: Result<(T?, URLResponse?), Error>) throws -> Void) {
+    _ result: Result<(T, URLResponse?), Error>) throws -> Void) {
 
     perform { result in
       switch result {
@@ -167,8 +168,13 @@ open class Request: AbstractRequest {
           return
         }
 
-        let object = try JSONDecoder().decode(T.self, from: data)
-        try completionHandler(.success((object, response.urlResponse)))
+        do {
+          let object = try JSONDecoder().decode(T.self, from: data)
+          try completionHandler(.success((object, response.urlResponse)))
+        } catch let error {
+          try completionHandler(.failure(error))
+        }
+
       case .failure(let error):
         try completionHandler(.failure(error))
       }
@@ -192,7 +198,7 @@ open class Request: AbstractRequest {
 
     if let headers = headers {
       headers.forEach { header in
-        request.addValue(header.key, forHTTPHeaderField: header.value)
+        request.setValue(header.value, forHTTPHeaderField: header.key)
       }
     }
 
