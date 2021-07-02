@@ -134,6 +134,13 @@ open class Request: AbstractRequest {
         return
       }
 
+      if let statusCode = (response as? HTTPURLResponse)?.statusCode,
+         !(200..<300 ~= statusCode) {
+
+        try? completionHandler(.failure(NetworkError.identifying(statusCode: statusCode)))
+        return
+      }
+
       try? completionHandler(.success((data, response)))
     }
 
