@@ -11,7 +11,7 @@ jobs:
     - name: Generate coverage report
       run: |
         swift test --enable-code-coverage
-        xcrun llvm-cov export -format="lcov" .build/debug/SwiftQuestsPackageTests.xctest -instr-profile .build/debug/codecov/default.profdata > info.lcov
+        xcrun llvm-cov export -format="lcov" .build/debug/SwiftQuestsPackageTests.xctest/Contents/MacOS/SwiftQuestsPackageTests -instr-profile .build/debug/codecov/default.profdata > info.lcov
     - name: Codecov
       uses: codecov/codecov-action@v1.0.5
       with:
