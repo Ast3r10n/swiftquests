@@ -1,4 +1,4 @@
-name: Swift
+name: Test
 
 on: [pull_request]
 
@@ -10,16 +10,8 @@ jobs:
     - uses: actions/checkout@v2
     - name: Build
       run: swift build -v
-  test:
-    runs-on: macos-latest
-    steps:
-    - uses: actions/checkout@v2
     - name: Run tests
       run: swift test -v --enable-code-coverage
-    
-  codecov:
-    runs-on: macos-latest
-    steps:
     - uses: actions/checkout@v2
     - name: Generate coverage report
       run: xcodebuild -scheme SwiftQuests -sdk iphonesimulator -destination 'platform=iOS Simulator,name=iPhone 11 Pro' -enableCodeCoverage YES build test
@@ -27,4 +19,4 @@ jobs:
       uses: codecov/codecov-action@v1.0.5
       with:
         token: 44439f4d-d012-4000-a0c1-28647d07b545
-        # file: 
+        # file:
