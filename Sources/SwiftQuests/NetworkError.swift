@@ -50,6 +50,9 @@ public enum NetworkError: LocalizedError {
     }
   }
 
+  /// Returns a NetworkError identifying a given HTTP error.
+  /// - Parameter statusCode: The given HTTP status code.
+  /// - Returns: A NetworkError identified by the given status code.
   public static func identifying(statusCode: Int) -> NetworkError {
     switch statusCode {
     case 400:
