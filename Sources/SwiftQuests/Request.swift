@@ -123,7 +123,6 @@ open class Request: AbstractRequest {
   /// - Parameters:
   ///   - completionHandler: An handler called upon completion.
   ///   - result: The response result.
-  ///   - error: The task error.
   /// - Throws: An error if either the `urlRequest` property was not properly initialised, or the `completionHandler`
   ///   throws.
   open func perform(_ completionHandler: @escaping (_ result: Result<Response, Error>) throws -> Void) {
@@ -131,6 +130,13 @@ open class Request: AbstractRequest {
     let task = session.dataTask(with: urlRequest) { data, response, error in
       if let error = error {
         try? completionHandler(.failure(error))
+        return
+      }
+
+      if let statusCode = (response as? HTTPURLResponse)?.statusCode,
+         !(200..<300 ~= statusCode) {
+
+        try? completionHandler(.failure(NetworkError.identifying(statusCode: statusCode)))
         return
       }
 
@@ -153,7 +159,6 @@ open class Request: AbstractRequest {
   ///   - object: An object type to decode from the response data.
   ///   - completionHandler: An handler called upon completion.
   ///   - result: The response result.
-  ///   - error: The task error.
   open func perform<T: Decodable>(decoding object: T.Type,
                                   _ completionHandler: @escaping (
     _ result: Result<(T, URLResponse?), Error>) throws -> Void) {
@@ -161,7 +166,8 @@ open class Request: AbstractRequest {
     perform { result in
       switch result {
       case .success(let response):
-        guard let data = response.data else {
+        guard let data = response.data,
+              !data.isEmpty else {
           try completionHandler(.failure(NSError(domain: "",
                                              code: 0,
                                              userInfo: [NSLocalizedDescriptionKey: "Data returned nil."])))
