@@ -104,12 +104,9 @@ final class RequestTests: XCTestCase {
                  onSession: session)
       .perform { result in
 
-        switch result {
-        case .failure(let error):
+        if case .failure(let error) = result {
           XCTAssertEqual(error as? NetworkError, NetworkError.notFound)
           throwExpectation.fulfill()
-        case .success:
-          XCTFail("Request should throw an error with status code 404")
         }
       }
 
