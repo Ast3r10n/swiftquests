@@ -94,18 +94,19 @@ final class RequestTests: XCTestCase {
 
         XCTAssertThrowsError(try result.get())
         throwExpectation.fulfill()
-    }
+      }
 
     wait(for: [throwExpectation], timeout: 5)
   }
 
   func testPerformStatusCodeErrorReturn() {
     let throwExpectation = expectation(description: "Perform should throw an error")
-    let session = URLSessionMock()
-    session.response = HTTPURLResponse(url: URL(string: "https://test.com/test")!,
-                                       statusCode: 404,
-                                       httpVersion: nil,
-                                       headerFields: [:])
+    URLProtocolMock.response = (nil,
+                                HTTPURLResponse(url: URL(string: "https://test.com/test")!,
+                                                statusCode: 404,
+                                                httpVersion: nil,
+                                                headerFields: [:]),
+                                nil)
 
     try? Request(.get,
                  atPath: "/test",
@@ -160,6 +161,12 @@ final class RequestTests: XCTestCase {
 
   func testPerformDecodingNoDataError() {
     let throwingExpectation = expectation(description: "Perform should throw an error")
+    URLProtocolMock.response = (nil,
+                                HTTPURLResponse(url: URL(string: "https://test.com/test")!,
+                                                statusCode: 200,
+                                                httpVersion: nil,
+                                                headerFields: [:]),
+                                nil)
 
     try? Request(.get,
                  atPath: "/user",
