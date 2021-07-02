@@ -69,7 +69,7 @@ open class Request: AbstractRequest {
   /// The request `URLSession`.
   ///
   /// Defaults to a session with a `default` `URLSessionConfiguration` unless otherwise specified.
-  public var session = URLSession.shared
+  public var session = URLSession(configuration: .ephemeral)
 
   /// The wrapped `URLRequest` object.
   public var urlRequest: URLRequest!
@@ -134,13 +134,21 @@ open class Request: AbstractRequest {
         return
       }
 
+      if let statusCode = (response as? HTTPURLResponse)?.statusCode,
+         !(200..<300 ~= statusCode) {
+
+        try? completionHandler(.failure(NetworkError.identifying(statusCode: statusCode)))
+        return
+      }
+
       try? completionHandler(.success((data, response)))
     }
 
     if let credential = credential {
-      URLCredentialStorage.shared.set(credential,
-                                      for: configuration.protectionSpace,
-                                      task: task)
+      URLCredentialStorage.shared.set(
+        credential,
+        for: configuration.protectionSpace,
+        task: task)
     }
 
     task.resume()
