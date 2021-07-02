@@ -166,7 +166,8 @@ open class Request: AbstractRequest {
     perform { result in
       switch result {
       case .success(let response):
-        guard let data = response.data else {
+        guard let data = response.data,
+              !data.isEmpty else {
           try completionHandler(.failure(NSError(domain: "",
                                              code: 0,
                                              userInfo: [NSLocalizedDescriptionKey: "Data returned nil."])))
