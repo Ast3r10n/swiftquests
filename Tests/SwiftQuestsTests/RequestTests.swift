@@ -91,6 +91,31 @@ final class RequestTests: XCTestCase {
     wait(for: [throwExpectation], timeout: 5)
   }
 
+  func testPerformStatusCodeErrorReturn() {
+    let throwExpectation = expectation(description: "Perform should throw an error")
+    let session = URLSessionMock()
+    session.response = HTTPURLResponse(url: URL(string: "https://test.com/test")!,
+                                       statusCode: 404,
+                                       httpVersion: nil,
+                                       headerFields: [:])
+
+    try? Request(.get,
+                 atPath: "/test",
+                 onSession: session)
+      .perform { result in
+
+        switch result {
+        case .failure(let error):
+          XCTAssertEqual(error as? NetworkError, NetworkError.notFound)
+          throwExpectation.fulfill()
+        case .success:
+          XCTFail("Request should throw an error with status code 404")
+        }
+      }
+
+    wait(for: [throwExpectation], timeout: 5)
+  }
+
   func testPerformDecoding() {
     let decodingExpectation = expectation(description: "Object should decode correctly")
 
