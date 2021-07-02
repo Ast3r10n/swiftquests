@@ -181,13 +181,4 @@ final class RequestTests: XCTestCase {
 
     wait(for: [throwingExpectation], timeout: 5)
   }
-
-  static var allTests = [
-    ("testInit", testInitMethod),
-    ("testInitResourcePath", testInitResourcePath),
-    ("testInitParameters", testInitParameters),
-    ("testInitHeaders", testInitHeaders),
-    ("testInitBody", testInitBody),
-    ("testPerform", testPerform),
-  ]
 }
