@@ -68,8 +68,6 @@ final class RequestTests: XCTestCase {
         XCTAssertEqual(request?.configuration.baseURL, DefaultRequestConfiguration().baseURL)
     }
     
-    func 
-    
     func testPerform() {
         let resultExpectation = expectation(description: "Request should perform correctly")
         
