@@ -16,7 +16,7 @@ Pod::Spec.new do |spec|
   #
 
   spec.name         = "SwiftQuests"
-  spec.version      = "0.3"
+  spec.version      = "0.4.0"
   spec.summary      = "An object-oriented, URLSession-based network library."
 
   # This description is used to generate tags and improve search results.
@@ -64,7 +64,6 @@ Pod::Spec.new do |spec|
   #
 
   # spec.platform     = :ios
-  spec.platform     = :ios, "8.0"
 
   #  When using multiple platforms
   # spec.ios.deployment_target = "8.0"
