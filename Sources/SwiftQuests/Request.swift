@@ -21,6 +21,8 @@ public typealias Response = (data: Data?, urlResponse: URLResponse?)
 
 /// A common interface for `Request`s and `RequestDecorator`s.
 public protocol AbstractRequest {
+    @available(macOS 12, iOS 13, watchOS 8, tvOS 15, *)
+    func perform() async throws -> Response
     func perform(_ completionHandler: @escaping (_ result: Result<Response, Error>) throws -> Void)
 }
 
@@ -37,7 +39,7 @@ public protocol RequestDecorator: AbstractRequest {
 /// use either the `perform(_:)` or `perform(decoding:_:)` methods to launch the request.
 /// `Request` properties are constants and only set within the initialiser.
 open class Request: AbstractRequest {
-    
+
     // MARK: - Public Properties
     /// The request REST method.
     public let method: RESTMethod
@@ -73,13 +75,13 @@ open class Request: AbstractRequest {
     
     /// The wrapped `URLRequest` object.
     public var urlRequest: URLRequest!
-    
+
     /// The request configuration.
     ///
     /// Defaults to the configuration stored in the `RequestConfigurationHolder` `shared` instance unless otherwise
     /// specified.
     open private(set) var configuration: RequestConfiguration = RequestConfigurationHolder.shared.configuration
-    
+
     // MARK: - Public Methods
     /// Creates a `Request` with the specified properties.
     /// - Parameters:
@@ -100,7 +102,7 @@ open class Request: AbstractRequest {
                 using credential: URLCredential? = nil,
                 onSession session: URLSession? = nil,
                 configuration: RequestConfiguration? = nil) throws {
-        
+
         self.method = method
         self.resourcePath = resourcePath
         self.parameters = parameters
@@ -115,8 +117,28 @@ open class Request: AbstractRequest {
         if let session = session {
             self.session = session
         }
-        
+
         self.urlRequest = try prepare()
+    }
+
+    /// Performs the request asynchronously.
+    /// - Throws: An error if either the `urlRequest` property was not properly initialised, or the task throws.
+    @available(macOS 12, iOS 13, watchOS 8, tvOS 15, *)
+    open func perform() async throws -> Response {
+        if let credential = credential {
+            URLCredentialStorage.shared.set(
+                credential,
+                for: configuration.protectionSpace)
+        }
+
+        let response = try await session.data(for: urlRequest)
+        if let statusCode = (response.1 as? HTTPURLResponse)?.statusCode,
+           !(200..<300 ~= statusCode) {
+
+            throw NetworkError.identifying(statusCode: statusCode)
+        }
+
+        return response
     }
     
     /// Performs the request, then executes the code block passed to the `completionHandler`.
@@ -126,7 +148,7 @@ open class Request: AbstractRequest {
     /// - Throws: An error if either the `urlRequest` property was not properly initialised, or the `completionHandler`
     ///   throws.
     open func perform(_ completionHandler: @escaping (_ result: Result<Response, Error>) throws -> Void) {
-        
+
         let task = session.dataTask(with: urlRequest) { data, response, error in
             if let error = error {
                 try? completionHandler(.failure(error))
@@ -152,6 +174,23 @@ open class Request: AbstractRequest {
         
         task.resume()
     }
+
+    /// Performs the request asynchronously,, trying to decode a specified `object` from the response.
+    /// - Parameters:
+    ///   - object: An object type to decode from the response data.
+    ///   - result: The response result.
+    @available(macOS 12, iOS 13, watchOS 8, tvOS 15, *)
+    public func perform<T: Decodable>(decoding object: T.Type) async throws -> (T, URLResponse?) {
+        let result = try await perform()
+        guard let data = result.data,
+              !data.isEmpty else {
+            throw NSError(domain: "Request decoding",
+                          code: 404,
+                          userInfo: [NSLocalizedDescriptionKey: "Data returned nil."])
+        }
+
+        return try (JSONDecoder().decode(T.self, from: data), result.urlResponse)
+    }
     
     /// Performs the request, trying to decode a specified `object` from the response,
     /// and calls a handler upon completion.
@@ -159,7 +198,7 @@ open class Request: AbstractRequest {
     ///   - object: An object type to decode from the response data.
     ///   - completionHandler: An handler called upon completion.
     ///   - result: The response result.
-    open func perform<T: Decodable>(
+    public func perform<T: Decodable>(
         decoding object: T.Type,
         _ completionHandler: @escaping (
             _ result: Result<(T, URLResponse?), Error>) throws -> Void) {
@@ -203,20 +242,20 @@ open class Request: AbstractRequest {
             request.addValue(header.value, forHTTPHeaderField: header.key)
         }
         
-        if let headers = headers {
+        if let headers {
             headers.forEach { header in
                 request.setValue(header.value, forHTTPHeaderField: header.key)
             }
         }
-        
-        if let body = body {
+
+        if let body {
             request.httpBody = body
         }
         
         return request
     }
     
-    private var requestComponents: URLComponents {
+    private lazy var requestComponents: URLComponents = {
         var components = URLComponents()
         components.scheme = configuration.requestProtocol
         components.host = configuration.baseURL
@@ -228,7 +267,7 @@ open class Request: AbstractRequest {
         }
         
         return components
-    }
+    }()
     
     private func add(_ parameters: [String: String], to urlComponents: inout URLComponents) {
         if urlComponents.queryItems == nil {

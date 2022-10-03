@@ -9,53 +9,58 @@ import XCTest
 @testable import SwiftQuests
 
 final class RequestTests: XCTestCase {
-    var request: Request?
+    var request: Request!
     
     var session = URLSession(configuration: .ephemeral)
     
-    override func setUp() {
+    override func setUpWithError() throws {
         super.setUp()
-        URLProtocolMock.response = nil
+        URLProtocolMock.response = ("Test".data(using: .utf8),
+                                    HTTPURLResponse(url: try XCTUnwrap(URL(string: "https://test.com/test")),
+                                                    statusCode: 200,
+                                                    httpVersion: nil,
+                                                    headerFields: [:]),
+                                    nil)
         let configuration = URLSessionConfiguration.ephemeral
         configuration.protocolClasses = [URLProtocolMock.self]
         session = URLSession(configuration: configuration)
-        request = try? Request(.get,
-                               atPath: "/user",
-                               parameters: ["user": "12345"],
-                               body: try? JSONSerialization.data(withJSONObject: ["testBody": "thisisatest"],
-                                                                 options: .fragmentsAllowed),
-                               headers: ["Content-Type": "application/json"],
-                               using: URLCredential(user: "test",
-                                                    password: "testPassword",
-                                                    persistence: .forSession),
-                               onSession: session,
-                               configuration: DefaultRequestConfiguration())
+        request = try XCTUnwrap(Request(.get,
+                                        atPath: "/user",
+                                        parameters: ["user": "12345"],
+                                        body: JSONSerialization.data(withJSONObject: ["testBody": "thisisatest"],
+                                                                     options: .fragmentsAllowed),
+                                        headers: ["Content-Type": "application/json"],
+                                        using: URLCredential(user: "test",
+                                                             password: "testPassword",
+                                                             persistence: .forSession),
+                                        onSession: session,
+                                        configuration: DefaultRequestConfiguration()))
     }
     
     func testInitMethod() {
-        XCTAssertEqual(request?.method, RESTMethod(rawValue: "GET"))
+        XCTAssertEqual(request.method, RESTMethod(rawValue: "GET"))
     }
     
     func testInitResourcePath() {
-        XCTAssertEqual(request?.resourcePath, URLComponents(string: "/user")?.url?.absoluteString)
+        XCTAssertEqual(request.resourcePath, URLComponents(string: "/user")?.url?.absoluteString)
     }
     
     func testInitParameters() {
-        XCTAssertEqual(request?.parameters?["user"], "12345")
+        XCTAssertEqual(request.parameters?["user"], "12345")
     }
     
-    func testInitBody() {
-        XCTAssertEqual(request?.urlRequest?.httpBody,
-                       try? JSONSerialization.data(withJSONObject: ["testBody": "thisisatest"],
+    func testInitBody() throws {
+        XCTAssertEqual(request.urlRequest?.httpBody,
+                       try JSONSerialization.data(withJSONObject: ["testBody": "thisisatest"],
                                                    options: .fragmentsAllowed))
     }
     
     func testInitHeaders() {
-        XCTAssertEqual(request?.urlRequest?.allHTTPHeaderFields?["Content-Type"], "application/json")
+        XCTAssertEqual(request.urlRequest?.allHTTPHeaderFields?["Content-Type"], "application/json")
     }
     
     func testInitCredential() {
-        XCTAssertEqual(request?.credential, URLCredential(user: "test",
+        XCTAssertEqual(request.credential, URLCredential(user: "test",
                                                           password: "testPassword",
                                                           persistence: .forSession))
     }
@@ -65,13 +70,13 @@ final class RequestTests: XCTestCase {
     }
     
     func testInitConfiguration() {
-        XCTAssertEqual(request?.configuration.baseURL, DefaultRequestConfiguration().baseURL)
+        XCTAssertEqual(request.configuration.baseURL, DefaultRequestConfiguration().baseURL)
     }
     
     func testPerform() {
         let resultExpectation = expectation(description: "Request should perform correctly")
         
-        request?.perform { result in
+        request.perform { result in
             
             XCTAssertNoThrow(try result.get())
             resultExpectation.fulfill()
@@ -80,26 +85,26 @@ final class RequestTests: XCTestCase {
         wait(for: [resultExpectation], timeout: 5)
     }
     
-    func testPerformErrorReturn() {
+    func testPerformErrorReturn() throws {
         let throwExpectation = expectation(description: "Perform should throw an error")
         URLProtocolMock.response = (nil, nil, NSError(domain: "test",
                                                       code: 42,
                                                       userInfo: [NSLocalizedDescriptionKey: "Test error"]))
         
-        
-        try? Request(.get,
+
+        try Request(.get,
                      atPath: "/test",
                      onSession: session)
             .perform { result in
-                
+
                 XCTAssertThrowsError(try result.get())
                 throwExpectation.fulfill()
             }
-        
+
         wait(for: [throwExpectation], timeout: 5)
     }
     
-    func testPerformStatusCodeErrorReturn() {
+    func testPerformStatusCodeErrorReturn() throws {
         let throwExpectation = expectation(description: "Perform should throw an error")
         URLProtocolMock.response = (nil,
                                     HTTPURLResponse(url: URL(string: "https://test.com/test")!,
@@ -108,7 +113,7 @@ final class RequestTests: XCTestCase {
                                                     headerFields: [:]),
                                     nil)
         
-        try? Request(.get,
+        try Request(.get,
                      atPath: "/test",
                      onSession: session)
             .perform { result in
@@ -122,13 +127,13 @@ final class RequestTests: XCTestCase {
         wait(for: [throwExpectation], timeout: 5)
     }
     
-    func testPerformDecoding() {
+    func testPerformDecoding() throws {
         let decodingExpectation = expectation(description: "Object should decode correctly")
         let user = User()
         user.username = "test"
-        URLProtocolMock.response = (try? JSONEncoder().encode(user), nil, nil)
+        URLProtocolMock.response = (try JSONEncoder().encode(user), nil, nil)
         
-        try? Request(.get,
+        try Request(.get,
                      atPath: "/user",
                      onSession: session)
             .perform(decoding: User.self) { result in
@@ -143,11 +148,11 @@ final class RequestTests: XCTestCase {
         wait(for: [decodingExpectation], timeout: 5)
     }
     
-    func testPerformDecodingError() {
+    func testPerformDecodingError() throws {
         let throwingExpectation = expectation(description: "Perform should throw an error")
         URLProtocolMock.response = (Data(base64Encoded: "VEhJU0lTV1JPTkc="), nil, nil)
         
-        try? Request(.get,
+        try Request(.get,
                      atPath: "/user",
                      onSession: session)
             .perform(decoding: User.self) { result in
@@ -159,7 +164,7 @@ final class RequestTests: XCTestCase {
         wait(for: [throwingExpectation], timeout: 500)
     }
     
-    func testPerformDecodingNoDataError() {
+    func testPerformDecodingNoDataError() throws {
         let throwingExpectation = expectation(description: "Perform should throw an error")
         URLProtocolMock.response = (nil,
                                     HTTPURLResponse(url: URL(string: "https://test.com/test")!,
@@ -168,7 +173,7 @@ final class RequestTests: XCTestCase {
                                                     headerFields: [:]),
                                     nil)
         
-        try? Request(.get,
+        try Request(.get,
                      atPath: "/user",
                      onSession: session)
             .perform(decoding: User.self) { result in
@@ -180,11 +185,11 @@ final class RequestTests: XCTestCase {
         wait(for: [throwingExpectation], timeout: 5)
     }
     
-    func testPerformDecodingPerformError() {
+    func testPerformDecodingPerformError() throws {
         let throwingExpectation = expectation(description: "Perform should throw an error")
         URLProtocolMock.response = (nil, nil, NSError(domain: "test", code: 42, userInfo: [NSLocalizedDescriptionKey: "Test error"]))
         
-        try? Request(.get,
+        try Request(.get,
                      atPath: "/user",
                      onSession: session)
             .perform(decoding: User.self) { result in
